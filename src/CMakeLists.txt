@@ -12,7 +12,8 @@ set(sources
     minimax.cpp
     log_board.cpp
     timer.cpp
-    alphabeta.cpp)
+    alphabeta.cpp
+    pgn.cpp)
 
 if(HPX_FOUND)
   set(sources ${sources}

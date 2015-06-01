@@ -18,6 +18,7 @@
 #include "parallel_support.hpp"
 #include <boost/algorithm/string.hpp>
 #include "main.hpp"
+#include "pgn.hpp"
 #include <signal.h>
 #include <fstream>
 #include <sys/time.h>
@@ -132,6 +133,8 @@ int chx_main()
 
             if (output)
                 print_board(board, std::cout);
+            if (pgn_enabled)
+                pgn_output(move_to_make);
             if (auto_move)
                 auto_move = print_result(workq, board);
             else
@@ -387,6 +390,7 @@ int chx_main()
             board.ply = 0;
             workq.clear();
             gen(workq, board);
+            pgn_output(mov);
             print_result(workq, board);
         }
     }
