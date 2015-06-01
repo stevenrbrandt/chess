@@ -122,7 +122,7 @@ int chx_main()
                 continue;
             }
             if (output)
-                std::cout << "Computer's chess_move: " << move_str(move_to_make) << " time=" << std::setprecision(3) << 1e-3*(end-start) << " sec"
+                std::cout << "Computer's chess_move: " << move_to_make.str() << " time=" << std::setprecision(3) << 1e-3*(end-start) << " sec"
                     << std::endl;
             makemove(board, move_to_make); // Make the chess_move for our master board
             board.ply = 0; // Reset the board ply to 0
@@ -387,10 +387,11 @@ int chx_main()
             std::cout << "Illegal chess_move or command." << std::endl;
         else {
             makemove(board, mov);
+            if (pgn_enabled)
+                pgn_output(mov);
             board.ply = 0;
             workq.clear();
             gen(workq, board);
-            pgn_output(mov);
             print_result(workq, board);
         }
     }
@@ -610,10 +611,10 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
     }
     else
     {
-      std::cout << "  Computer's chess_move: " << move_str(move_to_make)
+      std::cout << "  Computer's chess_move: " << move_to_make.str()
         << std::endl;
 
-      logfile << "  Computer's chess_move: " << move_str(move_to_make)
+      logfile << "  Computer's chess_move: " << move_to_make.str()
         << std::endl;
     }
     // Allow time for aborted threads to get cleaned up
@@ -687,45 +688,6 @@ int parse_move(std::vector<chess_move>& workq, const char *s)
   return -1;
 }
 
-
-// move_str returns a string with chess_move m in coordinate notation
-
-char *move_str(chess_move& m)
-{
-  static char str[6];
-
-  char c;
-
-  if (m.getBits() & 32) {
-    switch (m.getPromote()) {
-      case KNIGHT:
-        c = 'n';
-        break;
-      case BISHOP:
-        c = 'b';
-        break;
-      case ROOK:
-        c = 'r';
-        break;
-      default:
-        c = 'q';
-        break;
-    }
-    sprintf(str, "%c%d%c%d%c",
-        COL(m.getFrom()) + 'a',
-        8 - ROW(m.getFrom()),
-        COL(m.getTo()) + 'a',
-        8 - ROW(m.getTo()),
-        c);
-  }
-  else
-    sprintf(str, "%c%d%c%d",
-        COL(m.getFrom()) + 'a',
-        8 - ROW(m.getFrom()),
-        COL(m.getTo()) + 'a',
-        8 - ROW(m.getTo()));
-  return str;
-}
 
 // print_board() prints the board
 

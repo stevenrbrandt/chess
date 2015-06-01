@@ -10,8 +10,8 @@ string chess_move::str()
 
     if (getBits() & 32)
     {   
-        ostr << COL(getFrom()) << "a" << 8 - ROW(getFrom()) <<
-                COL(getTo())   << "a" << 8 - ROW(getTo());
+        ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
+                (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
         switch (getPromote())
         { 
           case KNIGHT:
@@ -28,8 +28,8 @@ string chess_move::str()
             break;
         }
     } else
-        ostr << COL(getFrom()) << "a" << 8 - ROW(getFrom()) <<
-                COL(getTo())   << "a" << 8 - ROW(getTo());
+        ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
+                (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
     return ostr.str();
 }
 const char* chess_move::c_str()

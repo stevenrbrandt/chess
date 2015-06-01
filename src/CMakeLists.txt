@@ -13,6 +13,7 @@ set(sources
     log_board.cpp
     timer.cpp
     alphabeta.cpp
+    chess_move.cpp
     pgn.cpp)
 
 if(HPX_FOUND)
