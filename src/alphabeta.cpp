@@ -8,11 +8,15 @@
 //#undef NDEBUG
 
 #include "parallel_support.hpp"
+#include "database.hpp"
+#include "main.hpp"
 #include "search.hpp"
 #include <assert.h>
 #include "parallel.hpp"
 #include "zkey.hpp"
 #include <atomic>
+
+database dbase;
 
 void search_ab_pt(boost::shared_ptr<search_info> info)
 {
@@ -87,6 +91,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
     score_t max_val = bad_min_score;
     score_t zlo,zhi;
+	dbase.add_data(board, zhi, zlo);
     if(get_transposition_value(board,zlo,zhi)) {
         if(zlo >= beta) {
             return zlo;

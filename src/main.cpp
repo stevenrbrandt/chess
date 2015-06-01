@@ -17,6 +17,7 @@
 
 #include "parallel_support.hpp"
 #include <boost/algorithm/string.hpp>
+#include "database.hpp"
 #include "main.hpp"
 #include "pgn.hpp"
 #include <signal.h>
@@ -34,12 +35,15 @@
 #include <sstream>
 #include <iomanip>
 
+
 using namespace std;
 
 double sum_exec_times2 = 0;
 double sum_exec_times = 0;
 int count_exec_times;
 pcounter task_counter;
+
+
 
 void chx_terminate() {
     for(int i=0;i<3;i++)

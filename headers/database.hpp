@@ -54,8 +54,9 @@ class database {
         cout<<"database closed. \n";
     };
 
-    void add_data(const node_t& board, int ply, int hi, int lo){
-        auto hash= board.hash;
+    void add_data(const node_t& board, int hi, int lo){
+        int ply = board.ply;
+		auto hash= board.hash;
         const char *sql;    //maybe find a way to make work without const
         //create SQL statement from string into char * array
         std::ostringstream o;
@@ -71,7 +72,7 @@ class database {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
         }else{
-            fprintf(stdout, "Records created sucessfully\n");
+            //fprintf(stdout, "Records created sucessfully\n");
         }     
     };
 
