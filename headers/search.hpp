@@ -38,7 +38,7 @@ int min(int a,int b);
 int max(int a,int b);
 void xboard();
 
-extern Mutex mutex;
+extern Mutex cmutex;
 extern const int num_proc;
 
 struct safe_move {

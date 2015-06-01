@@ -137,7 +137,7 @@ score_t search(boost::shared_ptr<search_info> info)
 
     if (board.ply == 0) {
         assert(max_move != INVALID_MOVE);
-        ScopedLock s(mutex);
+        ScopedLock s(cmutex);
         move_to_make = max_move;
     }
 

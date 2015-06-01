@@ -21,7 +21,7 @@ class database {
     
     
     database(){
-        char *sql;
+        const char *sql;
         rc = sqlite3_open("test.db", &db);
         if( rc ){
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
@@ -100,7 +100,7 @@ class database {
 
     int get_data(){
       const char *data= "Callback function called";
-      char *sql= "SELECT * from MoveSet";
+      const char *sql= "SELECT * from MoveSet";
       rc= sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
       if (rc!= SQLITE_OK ){
          fprintf(stderr, "SQL error: %s\n", zErrMsg);
