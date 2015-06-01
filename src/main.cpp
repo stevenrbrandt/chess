@@ -699,7 +699,7 @@ int parse_move(std::vector<chess_move>& workq, const char *s)
 
 // print_board() prints the board
 
-void print_board(const node_t& board, std::ostream& out)
+void print_board(const node_t& board, std::ostream& out,bool trimmed)
 {
   int i;
 
