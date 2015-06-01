@@ -363,7 +363,11 @@ int chx_main()
             << "original" << ((chosen_evaluator == ORIGINAL) ? "=current" : "") << ","
             << "simple" << ((chosen_evaluator == SIMPLE) ? "=current" : "") << ")"
             << std::endl;
-          std::cout << "  search <function>\n\tswitches the current search method in use" << std::endl;
+          std::cout << "  search <function>\n\tswitches the current search method in use ("
+                    << "minimax" << (search_method == MINIMAX ? "=current" : "")
+                    << ",alphabeta"<< (search_method == ALPHABETA ? "=current" : "")
+                    << ",mtdf" << (search_method == MTDF ? "=current" : "")
+                    << ")" << std::endl;
           std::cout << "  go\tcomputer makes a chess_move" << std::endl;
           std::cout << "  auto\tcomputer will continue to make moves until game is over" << std::endl;
           std::cout << "  new\tstarts a new game" << std::endl;
