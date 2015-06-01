@@ -702,25 +702,26 @@ int parse_move(std::vector<chess_move>& workq, const char *s)
 void print_board(const node_t& board, std::ostream& out,bool trimmed)
 {
   int i;
-
-  out << std::endl << "8 ";
+  
+  if (!trimmed) out << std::endl << "8 ";
   for (i = 0; i < 64; ++i) {
+    if (!trimmed) out << " ";
     switch (board.color[i]) {
       case EMPTY:
-        out << " .";
+        out << ".";
         break;
       case LIGHT:
-        out << " " << piece_char[(size_t)board.piece[i]];
+        out <<  piece_char[(size_t)board.piece[i]];
         break;
       case DARK:
         char ch = (piece_char[(size_t)board.piece[i]] + ('a' - 'A'));
-        out << " " << ch;
+	out << ch;
         break;
     }
     if ((i + 1) % 8 == 0 && i != 63)
-      out << std::endl << 7 - ROW(i) << " ";
+      if (!trimmed) out << std::endl << 7 - ROW(i) << " ";
   }
-  out << std::endl << std::endl << "   a b c d e f g h" << std::endl << std::endl;
+  if (!trimmed) out << std::endl << std::endl << "   a b c d e f g h" << std::endl << std::endl;
 }
 
 
