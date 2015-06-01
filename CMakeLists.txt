@@ -40,7 +40,7 @@ endif()
 
 set(EXTRA_LIBS pthread)
 
-#find_package(Readline)
+find_package(Readline)
 
 if(READLINE_FOUND)
   message("Readline was found.")
