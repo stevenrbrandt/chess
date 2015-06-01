@@ -363,7 +363,7 @@ int chx_main()
             << "original" << ((chosen_evaluator == ORIGINAL) ? "=current" : "") << ","
             << "simple" << ((chosen_evaluator == SIMPLE) ? "=current" : "") << ")"
             << std::endl;
-          std::cout << "  search <function>\n\tswitches the current search method in use (" 
+          std::cout << "  search <function>\n\tswitches the current search method in use ("
                     << "minimax" << (search_method == MINIMAX ? "=current" : "")
                     << ",alphabeta"<< (search_method == ALPHABETA ? "=current" : "")
                     << ",mtdf" << (search_method == MTDF ? "=current" : "")
