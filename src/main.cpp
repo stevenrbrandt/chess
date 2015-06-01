@@ -18,6 +18,7 @@
 #include "parallel_support.hpp"
 #include <boost/algorithm/string.hpp>
 #include "main.hpp"
+#include "pgn.hpp"
 #include <signal.h>
 #include <fstream>
 #include <sys/time.h>
@@ -53,6 +54,8 @@ void chx_terminate() {
 
 int auto_move = 0;
 int computer_side;
+
+bool pgn_enabled = false;
 
 #ifdef HPX_SUPPORT
 std::ofstream **streams;
@@ -130,6 +133,8 @@ int chx_main()
 
             if (output)
                 print_board(board, std::cout);
+            if (pgn_enabled)
+                pgn_output(move_to_make);
             if (auto_move)
                 auto_move = print_result(workq, board);
             else
@@ -189,6 +194,11 @@ int chx_main()
             continue;
         }
 #endif
+        if (input[0] == "pgn") {
+            pgn_enabled = !pgn_enabled;
+            cout << "PGN output " << (pgn_enabled?"enabled.":"disabled.") << std::endl;
+            continue;
+        }
         if (input[0] == "new") {
             computer_side = EMPTY;
             init_board(board);
@@ -354,14 +364,15 @@ int chx_main()
             << "simple" << ((chosen_evaluator == SIMPLE) ? "=current" : "") << ")"
             << std::endl;
           std::cout << "  search <function>\n\tswitches the current search method in use" << std::endl;
-          std::cout << "  go\n\tcomputer makes a chess_move" << std::endl;
-          std::cout << "  auto\n\tcomputer will continue to make moves until game is over" << std::endl;
-          std::cout << "  new\n\tstarts a new game" << std::endl;
+          std::cout << "  go\tcomputer makes a chess_move" << std::endl;
+          std::cout << "  auto\tcomputer will continue to make moves until game is over" << std::endl;
+          std::cout << "  new\tstarts a new game" << std::endl;
           std::cout << "  wd <number>\n\tsets white search depth (currently " << depth[LIGHT] << ")" << std::endl;
           std::cout << "  bd <number>\n\tsets black search depth (currently " << depth[DARK] << ")" << std::endl;
-          std::cout << "  d\n\tdisplay the board" << std::endl;
+          std::cout << "  d\tdisplay the board" << std::endl;
           std::cout << "  o <on/off>\n\ttoggles engine output on or off (default on)" << std::endl;
-          std::cout << "  exit\n\texit the program" << std::endl;
+          std::cout << "  pgn\ttoggles output of moves to pgn file." << std::endl;
+          std::cout << "  exit\texit the program" << std::endl;
           std::cout << "  Enter moves in coordinate notation, e.g., e2e4, e7e8Q" << std::endl;
           std::cout << std::endl;
           continue;
@@ -379,6 +390,7 @@ int chx_main()
             board.ply = 0;
             workq.clear();
             gen(workq, board);
+            pgn_output(mov);
             print_result(workq, board);
         }
     }
