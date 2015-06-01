@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) 2011 Steve Brandt and Phillip LeBlanc
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -15,6 +15,7 @@
 #include "data.hpp"
 #include "search.hpp"
 #include "chess_move.hpp"
+#include "database.hpp"
 
 int main(int argc, char *argv[]);
 int parse_move(std::vector<chess_move>& workq, const char *s);
@@ -26,6 +27,7 @@ int get_ms();
 std::string get_log_name();
 int chx_main();
 #ifdef HPX_SUPPORT
+extern database dbase;
 extern std::ofstream **streams;
 extern bool file_output_enabled;
 #endif
