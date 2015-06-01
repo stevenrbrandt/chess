@@ -341,7 +341,7 @@ int chx_main()
             search_m = input.at(1);
           }
           catch (out_of_range&) {
-            std::cout << "Name of search method (minimax,alphabeta,mtdf): ";
+            std::cout << "Name of search method (minimax,alphabeta,mtdf): "; 
             std::cin >> search_m;
           }
           if (search_m == "minimax") {
