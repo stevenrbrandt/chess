@@ -34,7 +34,7 @@ void xboard()
                 computer_side = EMPTY;
                 continue;
             }
-            std::cout << "chess_move " << move_str(move_to_make.b) << std::endl;
+            std::cout << "chess_move " << move_to_make.b.str() << std::endl;
             std::cout.flush();
             makemove(board, move_to_make.b);
             board.ply = 0;
@@ -91,7 +91,7 @@ void xboard()
             think(board, false);
             if (move_to_make.u == 0)
                 continue;
-            std::cout << "Hint: " << move_str(move_to_make.b) << std::endl;
+            std::cout << "Hint: " << move_to_make.b.str() << std::endl;
             continue;
         }
 

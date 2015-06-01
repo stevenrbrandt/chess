@@ -9,6 +9,7 @@
 #define CHESS_MOVE_HPP_C1BEDE43_B47B_4694_ACF4_F41143D72B97
 
 #include <stdint.h>
+#include <string>
 /* This is the basic description of a chess_move. promote is what
    piece to promote the pawn to, if the chess_move is a pawn
    promotion. bits is a bitfield that describes the chess_move,
@@ -95,6 +96,8 @@ public:
         ar & this->promote;
         ar & this->bits;
     }
+    std::string str();
+    const char *c_str();
 };
 
 #endif
