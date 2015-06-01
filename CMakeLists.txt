@@ -38,7 +38,7 @@ else()
   message("Could not find HPX. Configuring without HPX support.")
 endif()
 
-set(EXTRA_LIBS pthread)
+set(EXTRA_LIBS pthread sqlite3)
 
 find_package(Readline)
 find_package(SQLite3)
