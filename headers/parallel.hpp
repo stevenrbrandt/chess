@@ -40,3 +40,4 @@ struct ScopedLock {
 #endif
 
 #endif
+//extern Mutex mutex;

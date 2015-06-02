@@ -23,7 +23,7 @@
 #include <fstream>
 #include <sstream>
 
-Mutex mutex;
+Mutex cmutex;
 const int num_proc = chx_threads_per_proc();
 
 int min(int a,int b) { return a < b ? a : b; }
@@ -339,12 +339,19 @@ void sort_pv(std::vector<chess_move>& workq, int index)
 
 #define TRANSPOSE_ON 1
 
+inline int iabs(int n) {
+  if(n < 0)
+    return -n;
+  else
+    return n;
+}
+
 zkey_t transposition_table[table_size];
 
 bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) {
     bool gotten = false;
 #ifdef TRANSPOSE_ON
-    int n = abs(board.hash^board.depth) % table_size;
+    int n = iabs(board.hash^board.depth) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(z->depth >= 0 && board_equals(board,z->board)) {
@@ -361,7 +368,7 @@ bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) 
 
 void set_transposition_value(const node_t& board,score_t lower,score_t upper) {
 #ifdef TRANSPOSE_ON
-    int n = abs(board.hash^board.depth) % table_size;
+    int n = iabs(board.hash^board.depth) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(board.depth >= z->depth) {
