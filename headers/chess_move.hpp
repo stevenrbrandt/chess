@@ -55,10 +55,10 @@ public:
         u = ((from & 0xFF) << 24) + ((to & 0xFF) << 16) + ((promote & 0xFF) << 8)
             + ((bits & 0xFF) << 0);
     }
-    uint8_t getFrom() { return from; }
-    uint8_t getTo() { return to; }
-    uint8_t getPromote() { return promote; }
-    uint8_t getBits() { return bits; }
+    uint8_t getFrom()    const { return from; }
+    uint8_t getTo()      const { return to; }
+    uint8_t getPromote() const { return promote; }
+    uint8_t getBits()    const { return bits; }
     uint8_t getCapture() const {
         return (bits & 1) != 0;
     }
@@ -96,8 +96,8 @@ public:
         ar & this->promote;
         ar & this->bits;
     }
-    std::string str();
-    std::string pgn();
+    std::string str() const;
+    std::string pgn() const;
 };
 
 #endif

@@ -4,7 +4,12 @@
 
 using namespace std;
 
-void pgn_output(chess_move &move)
+const void pgn_output(const node_t &board, const chess_move &move)
 {
-    cout << "pgn " << move.pgn() << endl;
+    string piece;
+    piece = piece_char[(size_t)board.piece[move.getTo()]];
+    if (piece == "p")
+        piece = "";
+    cout << "pgn " << piece << (move.getCapture()?"x":"") << move.pgn() << endl;
 }
+

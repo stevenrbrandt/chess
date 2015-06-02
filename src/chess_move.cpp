@@ -5,7 +5,7 @@
 
 using namespace std;
 
-string chess_move::str()
+string chess_move::str() const
 {
     ostringstream ostr;
     ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
@@ -28,7 +28,7 @@ string chess_move::str()
         }
     return ostr.str();
 }
-string chess_move::pgn()
+string chess_move::pgn() const
 {
     ostringstream ostr;
     ostr << piece_char[getFrom()];
