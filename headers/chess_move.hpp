@@ -97,7 +97,6 @@ public:
         ar & this->bits;
     }
     std::string str();
-    const char *c_str();
 };
 
 #endif

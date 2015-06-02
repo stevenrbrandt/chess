@@ -32,7 +32,3 @@ string chess_move::str()
                 (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
     return ostr.str();
 }
-const char* chess_move::c_str()
-{
-    return this->str().c_str();
-}
