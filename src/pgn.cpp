@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void pgn_output(const chess_move &move)
+void pgn_output(chess_move &move)
 {
-    cout << "pgn\n";
+    cout << "pgn " << move.pgn() << endl;
 }

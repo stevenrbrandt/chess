@@ -124,6 +124,8 @@ int chx_main()
             if (output)
                 std::cout << "Computer's chess_move: " << move_to_make.str() << " time=" << std::setprecision(3) << 1e-3*(end-start) << " sec"
                     << std::endl;
+            if (pgn_enabled)
+                pgn_output(move_to_make);
             makemove(board, move_to_make); // Make the chess_move for our master board
             board.ply = 0; // Reset the board ply to 0
 
@@ -133,8 +135,6 @@ int chx_main()
 
             if (output)
                 print_board(board, std::cout);
-            if (pgn_enabled)
-                pgn_output(move_to_make);
             if (auto_move)
                 auto_move = print_result(workq, board);
             else
