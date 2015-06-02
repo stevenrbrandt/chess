@@ -97,6 +97,7 @@ public:
         ar & this->bits;
     }
     std::string str();
+    std::string pgn();
 };
 
 #endif

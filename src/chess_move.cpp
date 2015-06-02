@@ -7,11 +7,9 @@ using namespace std;
 string chess_move::str()
 {
     ostringstream ostr;
-
+    ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
+            (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
     if (getBits() & 32)
-    {   
-        ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
-                (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
         switch (getPromote())
         { 
           case KNIGHT:
@@ -27,8 +25,9 @@ string chess_move::str()
             ostr << "q";
             break;
         }
-    } else
-        ostr << (char)('a' + COL(getFrom())) << 8 - ROW(getFrom()) <<
-                (char)('a' + COL(getTo()))   << 8 - ROW(getTo());
     return ostr.str();
 }
+string chess_move::str()
+{
+}
+
