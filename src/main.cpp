@@ -140,7 +140,7 @@ int chx_main()
             else
                 print_result(workq, board);
 
-            move_to_make.set32BitMove(0); // Reset the chess_move to make
+            move_to_make.setBytes(0,0,0,0); // Reset the chess_move to make
 
             continue;
         }

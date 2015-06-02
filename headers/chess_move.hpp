@@ -38,14 +38,6 @@ public:
     uint32_t get32BitMove() {
         return u;
     }
-    void set32BitMove(int32_t mv)
-    {
-        u = mv;
-        from = ((mv >> 24) & 0xFF);
-        to = ((mv >> 16) & 0xFF);
-        promote = ((mv >> 8) & 0xFF);
-        bits = ((mv >> 0) & 0xFF);
-    }
     void setBytes(int8_t from, int8_t to, int8_t promote, int8_t bits)
     {
         this->from = from;
