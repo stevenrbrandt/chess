@@ -78,7 +78,7 @@ class database {
         //fprintf(stdout, "Records created sucessfully\n");
       }     
     }
-
+//look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
     int get_data(){
       const char *data= "Callback function called";
       const char *sql= "SELECT * from MoveSet";
@@ -89,7 +89,29 @@ class database {
       }else 
          fprintf(stdout, "Operation done  sucessfully\n");
          return 0;
-    };
+    }
+
+	int search_board(const node_t& board){
+		const char *sql;
+		const char *data= "Callback function called";
+		std::ostringstream current;
+		print_board(board,current,true);
+		std::string curr = current.str();
+		std::ostringstream out;
+	    out<< "SELECT * FROM MoveSet WHERE BOARD=\""<<curr<<"\";";
+
+		std::string result = out.str();
+		sql = result.c_str();
+		rc = sqlite3_exec(db,sql,callback, (void*)data,&zErrMsg);
+		if (rc!= SQLITE_OK){
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}else
+			fprintf(stdout, "Looked through board successfully\n");
+		return 0;
+	}
+	
+
     
     //callback used for select operation
     static int callback(void *NotUsed, int argc, char **argv, char **azColName){
