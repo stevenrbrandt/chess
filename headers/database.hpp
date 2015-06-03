@@ -70,7 +70,7 @@ class database {
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
       //"INSERT INTO \"MOVELIST\"VALUES (66,0);";
       //execute SQL statement
-      rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
+      rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
       if ( rc!= SQLITE_OK ){
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
@@ -82,7 +82,7 @@ class database {
     int get_data(){
       const char *data= "Callback function called";
       const char *sql= "SELECT * from MoveSet";
-      rc= sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
+      rc= sqlite3_exec(db, sql, 0, (void*)data, &zErrMsg);
       if (rc!= SQLITE_OK ){
          fprintf(stderr, "SQL error: %s\n", zErrMsg);
          sqlite3_free(zErrMsg);
@@ -91,40 +91,61 @@ class database {
          return 0;
     }
 
-	int search_board(const node_t& board){
+	int search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search){
 		const char *sql;
 		const char *data= "Callback function called";
-		std::ostringstream current;
-		print_board(board,current,true);
-		std::string curr = current.str();
-		std::ostringstream out;
-	    out<< "SELECT * FROM MoveSet WHERE BOARD=\""<<curr<<"\";";
-
+	  out<< "SELECT "<<select<<" FROM MoveSet WHERE \""<<value<<"\"=\""<<search<<"\";";
 		std::string result = out.str();
 		sql = result.c_str();
 		rc = sqlite3_exec(db,sql,callback, (void*)data,&zErrMsg);
+    cout<<"This is callback"<< callback << "\n";
 		if (rc!= SQLITE_OK){
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}else
-			fprintf(stdout, "Looked through board successfully\n");
-		return 0;
+			//fprintf(stdout, "Looked through board successfully\n");
+		return rc;
+  
+  
 	}
 	
-
+  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper){
+    bool gotten = false;
+    std::ostringstream current;
+    print_board(board,current,true);
+    std::string curr = current.str();
+    const char *hash = "HASH, HI";
+    const char *b = "BOARD";
+    std::ostringstream search;
+    search_board(board,search,  hash, b, curr);
+    std::string buscar = search.str();
+    //cout<< "Value "<< buscar<<"\n";
+    //fprintf(stdout, "Value: %s", search);
+    /*if (z->depth >= 0 && board_equals(board, z->board)){
+        lower = z->lower;
+        upper = z->upper;
+        gotten = true
+    } else {
+      lower = bad_min_score;
+      upper = bad_max_score;
+    }*/
+  return gotten;
+}
     
     //callback used for select operation
     static int callback(void *NotUsed, int argc, char **argv, char **azColName){
        int i;
+       std::ostringstream out;
        for(i=0; i<argc; i++){
-          printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+         out<< argv[i]<<"\n";
+         // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
        }
        printf("\n");
        return 0;
        };
     int main(){
         return 0;
-    };
+    }
 
 };
 //extern database dbase;

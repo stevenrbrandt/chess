@@ -89,10 +89,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     }
 
 
-    //int dbase.search_board(board);
     score_t max_val = bad_min_score;
     score_t zlo,zhi;
-	dbase.search_board(board);
+	  dbase.get_transposition_value(board,zlo,zhi);
     if(get_transposition_value(board,zlo,zhi)) {
         if(zlo >= beta) {
             return zlo;
