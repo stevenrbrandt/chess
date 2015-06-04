@@ -66,7 +66,7 @@ class database {
 	}
 
     void add_data(const node_t& board, score_t lo, score_t hi){
-      int ply = board.ply;
+      int ply = board.depth;
       auto hash= board.hash;
       const char *sql;    //maybe find a way to make work without const
       //create SQL statement from string into char * array
