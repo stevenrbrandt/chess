@@ -702,7 +702,7 @@ int parse_move(std::vector<chess_move>& workq, const char *s)
 void print_board(const node_t& board, std::ostream& out,bool trimmed)
 {
   int i;
-  
+  //if (trimmed) out<<'&'; 
   if (!trimmed) out << std::endl << "8 ";
   for (i = 0; i < 64; ++i) {
     if (!trimmed) out << " ";
