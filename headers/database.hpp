@@ -32,8 +32,8 @@ class database {
         sql = "CREATE TABLE MoveSet("  \
         "PLY              INTEGER     NOT NULL," \
         "BOARD               TEXT     NOT NULL,"\
-        "HI               INTEGER     NOT NULL,"\
-        "LO               INTEGER     NOT NULL,"\
+        "HI               NUMERIC(20) NOT NULL,"\
+        "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
         "PRIMARY KEY (PLY, BOARD));"; 
        //Execute SQL statement 
@@ -65,7 +65,7 @@ class database {
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
 	}
 
-    void add_data(const node_t& board, int hi, int lo){
+    void add_data(const node_t& board, score_t lo, score_t hi){
       int ply = board.ply;
       auto hash= board.hash;
       const char *sql;    //maybe find a way to make work without const
@@ -103,106 +103,100 @@ class database {
          return 0;
     }
 
-    bool get_database_value(const node_t& board, int zlo, int zhi){
+    bool get_database_value(const node_t& board, score_t& zlo, score_t& zhi){
+      bool gotten = false;
+      const char *sql;
+      std::ostringstream current, out;
+      print_board(board, current, true);
+      std::string curr = current.str();
+      out<< "SELECT LO, HI FROM MoveSet WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"="<<board.depth<<";";
+      std::string result = out.str();
+      sql=result.c_str();
+      int nrow, ncolumn;
+      char ** azResult=NULL;//index:5=ply,6=board, 7=hi, 8=lo
+      rc= sqlite3_get_table(db, sql, &azResult, &nrow, &ncolumn, &zErrMsg);
+      if(nrow > 0) {
+        for (int i=0; i<(nrow+1)*ncolumn;i++)
+          cout<<"azResult["<<i<<"] ="<<azResult[i]<<"\n";
+        cout << "nrow=" << nrow << " ncol=" << ncolumn << endl;
+        stringstream strValue; /*
+                                  strValue <<*azResult[5]; 
+        //std::string s= *azResult[5];
+        int num;//= atoi(s.c_str());
+        strValue>>num;
+        if (num == board.depth)*/
+        zlo = atoi(azResult[ncolumn+0]);
+        zhi = atoi(azResult[ncolumn+1]);
+        cout << "zlo=" << zlo << " zhi=" << zhi << endl;
+        gotten=true;
+      }
+      sqlite3_free_table(azResult);
+      return gotten;
+    }
+
+      int search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search){
+        const char *sql;
+        char *data= (char *)calloc(1, sizeof (*data));
+        out<< "SELECT "<<select<<" FROM MoveSet WHERE \""<<value<<"\"=\""<<search<<"\";";
+        std::string result = out.str();
+        sql = result.c_str();
+        rc = sqlite3_exec(db,sql,callback, (void*)data,&zErrMsg);
+        cout<<data<<"/n";
+        //cout<<"This is callback"<< callback << "\n";
+        if (rc!= SQLITE_OK){
+          fprintf(stderr, "SQL error: %s\n", zErrMsg);
+          sqlite3_free(zErrMsg);
+        }else
+          //fprintf(stdout, "Looked through board successfully\n");
+          return rc;
+
+
+      }
+
+      bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper){
         bool gotten = false;
-	const char *sql;
-	std::ostringstream current, out;
-	print_board(board, current, true);
-	std::string curr = current.str();
-	out<< "SELECT * FROM MoveSet WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"="<<board.depth<<";";
-	std::string result = out.str();
-	sql=result.c_str();
-	int nrow, ncolumn;
-	char ** azResult=NULL;//index:5=ply,6=board, 7=hi, 8=lo
-	rc= sqlite3_get_table(db, sql, &azResult, &nrow, &ncolumn, &zErrMsg);
-//	for (int i=0; i<(nrow+1)*ncolumn;i++)
-//	cout<<"azResult["<<i<<"] ="<<azResult[i]<<"\n";
-    if(nrow > 0) {
-	    stringstream strValue; /*
-	    strValue <<*azResult[5]; 
-		//std::string s= *azResult[5];
-	    int num;//= atoi(s.c_str());
-	    strValue>>num;
-	    if (num == board.depth){*/
-			int num;
-	        for (int i=0; i<2; i++){
-      	    strValue<<* azResult[7+i];
-		    strValue>>num;
-			//s= *azResult[7+i];
-			//num =atoi(s.c_str());
-		    if (i==1) zhi=num;
-		    else zlo=num;
-//		}
-		gotten=true;
-	    }
-	}
-	sqlite3_free_table(azResult);
-	return gotten;
-    }
+        std::ostringstream current;
+        print_board(board,current,true);
+        std::string curr = current.str();
+        const char *hash = "HASH, HI";
+        const char *b = "BOARD";
+        std::ostringstream search;
+        search_board(board,search,  hash, b, curr);
+        std::string buscar = search.str();
+        //cout<< "Value "<< buscar<<"\n";
+        //fprintf(stdout, "Value: %s", search);
+        /*if (z->depth >= 0 && board_equals(board, z->board)){
+          lower = z->lower;
+          upper = z->upper;
+          gotten = true
+          } else {
+          lower = bad_min_score;
+          upper = bad_max_score;
+          }*/
+        return gotten;
+      }
 
-	int search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search){
-		const char *sql;
-		char *data= (char *)calloc(1, sizeof (*data));
-	  out<< "SELECT "<<select<<" FROM MoveSet WHERE \""<<value<<"\"=\""<<search<<"\";";
-		std::string result = out.str();
-		sql = result.c_str();
-		rc = sqlite3_exec(db,sql,callback, (void*)data,&zErrMsg);
-		cout<<data<<"/n";
-    //cout<<"This is callback"<< callback << "\n";
-		if (rc!= SQLITE_OK){
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}else
-			//fprintf(stdout, "Looked through board successfully\n");
-		return rc;
-  
-  
-	}
-	
-  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper){
-    bool gotten = false;
-    std::ostringstream current;
-    print_board(board,current,true);
-    std::string curr = current.str();
-    const char *hash = "HASH, HI";
-    const char *b = "BOARD";
-    std::ostringstream search;
-    search_board(board,search,  hash, b, curr);
-    std::string buscar = search.str();
-    //cout<< "Value "<< buscar<<"\n";
-    //fprintf(stdout, "Value: %s", search);
-    /*if (z->depth >= 0 && board_equals(board, z->board)){
-        lower = z->lower;
-        upper = z->upper;
-        gotten = true
-    } else {
-      lower = bad_min_score;
-      upper = bad_max_score;
-    }*/
-  return gotten;
-}
-    
-    //callback used for select operation
-    static int callback(void *NotUsed, int argc, char **argv, char **azColName){
-       int i;
-       std::ostringstream out;
-       char ** res = (char **) NotUsed;
-       //*res=NULL(sizeof(char *));
-      // cout<<res<<"test\n";
-       *res =(char *)calloc(strlen(argv[2]),sizeof(char *));
-       strcpy(*res, argv[2]);
-	return 0;
-       for(i=0; i<argc; i++){
-         out<< argv[i]<<"\n";
-         // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-       }
-       printf("\n");
-       return 0;
-       };
-    int main(){
+      //callback used for select operation
+      static int callback(void *NotUsed, int argc, char **argv, char **azColName){
+        int i;
+        std::ostringstream out;
+        char ** res = (char **) NotUsed;
+        //*res=NULL(sizeof(char *));
+        // cout<<res<<"test\n";
+        *res =(char *)calloc(strlen(argv[2]),sizeof(char *));
+        strcpy(*res, argv[2]);
         return 0;
-    }
+        for(i=0; i<argc; i++){
+          out<< argv[i]<<"\n";
+          // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+        }
+        printf("\n");
+        return 0;
+      };
+      int main(){
+        return 0;
+      }
 
-};
+    };
 //extern database dbase;
 #endif

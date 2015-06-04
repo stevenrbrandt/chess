@@ -96,7 +96,7 @@ for my $a (@ARGV) {
 
 for(my $ply=4;$ply<=6;$ply++) {
     for(my $b=1;$b<=4;$b++) {
-        for my $sm (("minimax","alphabeta","mtdf")) {
+        for my $sm (("alphabeta")) {
             # It takes too long for minimax above ply 4
             # So I ran it once at 5 to verify the answer
             # and then introduced this next.
@@ -133,6 +133,7 @@ for(my $ply=4;$ply<=6;$ply++) {
                 $cmd="CHX_THREADS_PER_PROC=$threads $mem $chx < .bench|";
             }
             print "cmd=$cmd\n";
+            system("rm -f test.db");
             open($fd,$cmd);
             my $ans = "";
             my $score = $bad_score;
