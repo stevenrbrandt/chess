@@ -64,7 +64,7 @@ class database {
     }
     int depth;
 
-    void add_data(const node_t& board, score_t& lo, score_t& hi){
+    void add_data(const node_t& board, score_t lo, score_t hi){
      // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
       auto hash= board.hash;
@@ -156,10 +156,10 @@ class database {
        upper = zhi;
        gotten = true;
        }
-    /*else {
+    else {
       lower = bad_min_score;
       upper = bad_max_score;
-    }*/
+    }
   return gotten;
 }
 
