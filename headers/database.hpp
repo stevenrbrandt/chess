@@ -38,6 +38,7 @@ class database {
         }else{
           fprintf(stderr, "Opened database successfully\n");
         }
+        rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, &zErrMsg);
         /* Create SQL statement */
         sql = "CREATE TABLE MoveSet("  \
         "PLY              INTEGER     NOT NULL," \
