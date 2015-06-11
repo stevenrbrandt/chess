@@ -217,7 +217,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         {
             DECL_SCORE(s,-10000 + board.ply,board.hash);
             return s;
-        }
+       }
         else
         {
             DECL_SCORE(z,0,board.hash);
@@ -239,10 +239,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 	  dbase.add_data(board,
         max(zlo,max_val >= beta  ? max_val : bad_min_score),
         min(zhi,max_val < alpha ? max_val : bad_max_score));
-    set_transposition_value(board,
+   /* set_transposition_value(board,
         max(zlo,max_val >= beta  ? max_val : bad_min_score),
         min(zhi,max_val < alpha ? max_val : bad_max_score));
-
+*/
 
     return max_val;
 }

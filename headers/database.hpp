@@ -65,7 +65,13 @@ class database {
     }
     int depth;
 
-    void deleteAll(){
+ score_t score_board (const node_t& board) {
+    evaluator ev;
+    DECL_SCORE(s, ev.eval(board, chosen_evaluator), board.hash)
+    return s;
+  }
+
+  void deleteAll(){
 	const char *sql; 
 	std::ostringstream o;
 	o<<"delete from \"MoveSet\"";
@@ -121,29 +127,34 @@ class database {
       std::ostringstream current, out;
       print_board(board, current, true);
       std::string curr = current.str();
-      out<< "SELECT LO, HI FROM MoveSet WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"="<<board.depth<<";";
+      out<< "SELECT LO, HI, PLY FROM MoveSet WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\">"<<board.depth<<";";
       std::string result = out.str();
       sql=result.c_str();
       int nrow, ncolumn;
       char ** azResult=NULL;//index:5=ply,6=board, 7=hi, 8=lo
       rc= sqlite3_get_table(db, sql, &azResult, &nrow, &ncolumn, &zErrMsg);
       if(nrow > 0) {
-        for (int i=0; i<(nrow+1)*ncolumn;i++)
-          cout<<"azResult["<<i<<"] ="<<azResult[i]<<"\n";
-        cout << "nrow=" << nrow << " ncol=" << ncolumn << endl;
-        stringstream strValue; /*
-                                  strValue <<*azResult[5]; 
+        //for (int i=0; i<(nrow+1)*ncolumn;i++)
+          //cout<<"azResult["<<i<<"] ="<<azResult[i]<<"\n";
+        cout << "nrow=" << nrow << " ncol=" << ncolumn <<"       depth="<<azResult[ncolumn*nrow+2]<<" board.depth="<<board.depth<< endl;
+        /*stringstream strValue; 
+        strValue <<*azResult[5]; 
         //std::string s= *azResult[5];
         int num;//= atoi(s.c_str());
         strValue>>num;
         if (num == board.depth)*/
-        zlo = atoi(azResult[ncolumn+0]);
-        zhi = atoi(azResult[ncolumn+1]);
+        if (score_board(board) < atoi(azResult[ncolumn*nrow+0]));{
+        zlo = atoi(azResult[ncolumn*nrow+0]);
+        zhi = atoi(azResult[ncolumn*nrow+1]);
         cout << "zlo=" << zlo << " zhi=" << zhi << endl;
-        gotten=true;
+        gotten=true;}
+      }else{
+        zlo = bad_min_score;
+        zhi = bad_max_score;
       }
       sqlite3_free_table(azResult);
-      return gotten;
+   
+   return gotten;
     }
 
   struct args{
