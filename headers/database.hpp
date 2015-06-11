@@ -205,18 +205,20 @@ class database {
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr);
     if (! v_score.empty()){
+      if (score_board(board) < atoi(v_score[1])){
        int zhi = atoi(v_score[0]);
        int zlow= atoi(v_score[1]);
        lower = zlow;
        upper = zhi;
        gotten = true;
        }
+     }
     else {
       lower = bad_min_score;
       upper = bad_max_score;
     }
   return gotten;
-}
+  }
 
     //callback used for select operation
     static int callback(void *Used, int argc, char **argvalue, char **azColName){
