@@ -27,7 +27,6 @@ class database {
     int rc;
     struct args;
     
-    
     database(){
         const char *sql;
         rc = sqlite3_open("test.db", &db);
@@ -40,7 +39,7 @@ class database {
         }
         rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, &zErrMsg);
         /* Create SQL statement */
-        sql = "CREATE TABLE MoveSet("  \
+        sql = "CREATE TABLE  white("  \
         "PLY              INTEGER     NOT NULL," \
         "BOARD               TEXT     NOT NULL,"\
         "HI               NUMERIC(20) NOT NULL,"\
@@ -48,6 +47,20 @@ class database {
         "HASH             INTEGER     NOT NULL,"\
         "PRIMARY KEY (PLY, BOARD));"; 
        //Execute SQL statement 
+        rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
+        if( rc != SQLITE_OK ){
+            fprintf(stderr, "%s\n", zErrMsg);
+            sqlite3_free(zErrMsg);
+        }else{
+            fprintf(stdout, "Table created successfully\n");
+        }
+        sql = "CREATE TABLE black("  \
+        "PLY              INTEGER     NOT NULL," \
+        "BOARD               TEXT     NOT NULL,"\
+        "HI               NUMERIC(20) NOT NULL,"\
+        "LO               NUMERIC(20) NOT NULL,"\
+        "HASH             INTEGER     NOT NULL,"\
+        "PRIMARY KEY (PLY, BOARD));"; 
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
@@ -83,7 +96,7 @@ class database {
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
 	}
 
-    void add_data(const node_t& board, score_t lo, score_t hi){
+    void add_data(const node_t& board, score_t lo, score_t hi, bool white){
      // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
       auto hash= board.hash;
@@ -95,7 +108,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO \"MoveSet\"VALUES ("<<ply<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<<");";
+      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<ply<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
@@ -122,13 +135,13 @@ class database {
          return 0;
     }
 
-    bool get_database_value(const node_t& board, score_t& zlo, score_t& zhi){
+    bool get_database_value(const node_t& board, score_t& zlo, score_t& zhi, bool white){
       bool gotten = false;
       const char *sql;
       std::ostringstream current, out;
       print_board(board, current, true);
       std::string curr = current.str();
-      out<< "SELECT LO, HI, PLY FROM MoveSet WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\">"<<board.depth<<";";
+      out<< "SELECT LO, HI, PLY FROM "<<( white ? "white" :"black")<<" WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"<"<<board.depth<<";";
       std::string result = out.str();
       sql=result.c_str();
       int nrow, ncolumn;
@@ -171,11 +184,11 @@ class database {
     return o;
     }
 
-	pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search){
+	pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white){
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-	  out<< "SELECT "<<select<<" FROM MoveSet WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
+	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
     std::string result = out.str();
 		sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -194,7 +207,7 @@ class database {
 		return v_score; 
 	}
 	
-  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper){
+  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white){
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
@@ -203,7 +216,7 @@ class database {
     const char *b = "BOARD"; 
     int depth = board.depth;
     std::ostringstream search;
-    pseudo v_score = search_board(board, search, select, b, curr);
+    pseudo v_score = search_board(board, search, select, b, curr, white);
     if (! v_score.empty()){
        int zhi = atoi(v_score[0]);
        int zlow= atoi(v_score[1]);
