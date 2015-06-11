@@ -73,7 +73,7 @@ class database {
     
 //destructor
     ~database(){
-      get_data();
+     // get_data();
       sqlite3_close(db);
       cout<<"database closed. \n";
     }
@@ -84,7 +84,7 @@ class database {
     DECL_SCORE(s, ev.eval(board, chosen_evaluator), board.hash)
     return s;
   }
-
+/*
   void deleteAll(){
 	const char *sql; 
 	std::ostringstream o;
@@ -95,7 +95,7 @@ class database {
 	if ( rc == SQLITE_OK) cout<<"MoveSet sucessfully reset";	
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
 	}
-
+*/
     void add_data(const node_t& board, score_t lo, score_t hi, bool white){
      // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
@@ -123,7 +123,7 @@ class database {
       }     
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
-    int get_data(){
+/*    int get_data(){
       const char *data= "Callback function called";
       const char *sql= "SELECT * from MoveSet";
       rc= sqlite3_exec(db, sql, 0, (void*)data, &zErrMsg);
@@ -134,7 +134,7 @@ class database {
          fprintf(stdout, "Operation done  sucessfully\n");
          return 0;
     }
-
+*/
     bool get_database_value(const node_t& board, score_t& zlo, score_t& zhi, bool white){
       bool gotten = false;
       const char *sql;
@@ -188,7 +188,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
+	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"<"<<board.depth<<";";
     std::string result = out.str();
 		sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -219,10 +219,8 @@ class database {
     pseudo v_score = search_board(board, search, select, b, curr, white);
     if (! v_score.empty()){
       if (score_board(board) < atoi(v_score[1])){
-       int zhi = atoi(v_score[0]);
-       int zlow= atoi(v_score[1]);
-       lower = zlow;
-       upper = zhi;
+       lower =  atoi(v_score[0]);
+       upper =  atoi(v_score[1]);
        gotten = true;
        }
      }
