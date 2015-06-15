@@ -256,14 +256,14 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       store = false;
     }
 
-    if(store) {
+   // if(store) {
       if (board.side==LIGHT && board.depth > 3) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white);
       } else {
         set_transposition_value(board,lo,hi);
       }
-    }
+   // }
 
     return max_val;
 }

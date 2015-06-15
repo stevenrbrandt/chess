@@ -121,7 +121,7 @@ class database {
       }else{
         //fprintf(stdout, "Records created sucessfully\n");
       }
-      if (board.depth>4){
+      if (board.depth>3){
         cout<<"Adding depth of "<<board.depth<<endl;}
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
@@ -223,6 +223,7 @@ class database {
       if (score_board(board) < atoi(v_score[1])){
        lower =  atoi(v_score[0]);
        upper =  atoi(v_score[1]);
+        cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }
@@ -235,7 +236,8 @@ class database {
 
     //callback used for select operation
     static int callback(void *Used, int argc, char **argvalue, char **azColName){
-       pseudo* v_score=static_cast<pseudo*>(Used);
+        cout<<"callback is called"<<endl;
+        pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);
