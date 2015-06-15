@@ -97,7 +97,7 @@ class database {
 	}
 */
     void add_data(const node_t& board, score_t lo, score_t hi, bool white){
-     // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
+      //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
       auto hash= board.hash;
      const char *sql;    //maybe find a way to make work without const
@@ -120,7 +120,9 @@ class database {
         sqlite3_free(zErrMsg);
       }else{
         //fprintf(stdout, "Records created sucessfully\n");
-      }     
+      }
+      if (board.depth>4){
+        cout<<"Adding depth of "<<board.depth<<endl;}
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
 /*    int get_data(){
