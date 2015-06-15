@@ -18,7 +18,7 @@
 
 using namespace std;
 //using something = std::vector<std::string>;
-using pseudo = std::vector<char*>;
+using pseudo = std::vector<std::string>;
 
 class database {
   public:
@@ -219,11 +219,11 @@ class database {
     int depth = board.depth;
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white);
-    if (! v_score.empty()){
-      if (score_board(board) < atoi(v_score[1])){
-       lower =  atoi(v_score[0]);
-       upper =  atoi(v_score[1]);
-        cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
+    if (v_score.size() == 2){
+      if (score_board(board) < atoi(v_score.at(1).c_str())){
+       lower =  atoi(v_score.at(0).c_str());
+       upper =  atoi(v_score.at(1).c_str());
+       cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }
