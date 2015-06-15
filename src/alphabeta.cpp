@@ -244,26 +244,26 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
     bool store = true;
     score_t lo, hi;
-    if(max_val < alpha) {
+    if(max_val <= alpha) {
       lo = max_val;
       hi = zhi;
     } else if(alpha < max_val && max_val < beta) {
       lo = hi = max_val;
-    } else if(max_val > beta) {
+    } else if(max_val >= beta) {
       hi = max_val;
       lo = zlo;
     } else {
       store = false;
     }
 
-   // if(store) {
+    if(store) {
       if (board.side==LIGHT && board.depth > 3) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white);
       } else {
         set_transposition_value(board,lo,hi);
       }
-   // }
+    }
 
     return max_val;
 }
