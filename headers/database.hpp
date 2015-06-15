@@ -143,7 +143,7 @@ class database {
       std::ostringstream current, out;
       print_board(board, current, true);
       std::string curr = current.str();
-      out<< "SELECT LO, HI, PLY FROM "<<( white ? "white" :"black")<<" WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"<"<<board.depth<<";";
+      out<< "SELECT LO, HI, PLY FROM "<<( white ? "white" :"black")<<" WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\">"<<board.depth<<";";
       std::string result = out.str();
       sql=result.c_str();
       int nrow, ncolumn;
@@ -190,7 +190,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"<"<<board.depth<<";";
+	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\">"<<board.depth<<";";
     std::string result = out.str();
 		sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
