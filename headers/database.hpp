@@ -26,7 +26,7 @@ class database {
     char *zErrMsg=0;
     int rc;
     struct args;
-    
+
     database(){
         const char *sql;
         rc = sqlite3_open("test.db", &db);
@@ -45,8 +45,8 @@ class database {
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
-        "PRIMARY KEY (PLY, BOARD));"; 
-       //Execute SQL statement 
+        "PRIMARY KEY (PLY, BOARD));";
+       //Execute SQL statement
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
@@ -60,7 +60,7 @@ class database {
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
-        "PRIMARY KEY (PLY, BOARD));"; 
+        "PRIMARY KEY (PLY, BOARD));";
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
@@ -68,9 +68,9 @@ class database {
         }else{
             fprintf(stdout, "Table created successfully\n");
         }
-//	deleteAll();
+//    deleteAll();
     };
-    
+
 //destructor
     ~database(){
       get_data();
@@ -86,15 +86,15 @@ class database {
   }
 
   void deleteAll(){
-	const char *sql; 
-	std::ostringstream o;
-	o<<"delete from \"MoveSet\"";
-	std::string result = o.str();
-	sql=result.c_str();
-	rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
-	if ( rc == SQLITE_OK) cout<<"MoveSet sucessfully reset";	
+    const char *sql;
+    std::ostringstream o;
+    o<<"delete from \"MoveSet\"";
+    std::string result = o.str();
+    sql=result.c_str();
+    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    if ( rc == SQLITE_OK) cout<<"MoveSet sucessfully reset";
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
-	}
+    }
 
     void add_data(const node_t& board, score_t lo, score_t hi, bool white){
      // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
@@ -120,7 +120,7 @@ class database {
         sqlite3_free(zErrMsg);
       }else{
         //fprintf(stdout, "Records created sucessfully\n");
-      }     
+      }
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
     int get_data(){
@@ -130,7 +130,7 @@ class database {
       if (rc!= SQLITE_OK ){
          fprintf(stderr, "SQL error: %s\n", zErrMsg);
          sqlite3_free(zErrMsg);
-      }else 
+      }else
          fprintf(stdout, "Operation done  sucessfully\n");
          return 0;
     }
@@ -151,8 +151,8 @@ class database {
         //for (int i=0; i<(nrow+1)*ncolumn;i++)
           //cout<<"azResult["<<i<<"] ="<<azResult[i]<<"\n";
         cout << "nrow=" << nrow << " ncol=" << ncolumn <<"       depth="<<azResult[ncolumn*nrow+2]<<" board.depth="<<board.depth<< endl;
-        /*stringstream strValue; 
-        strValue <<*azResult[5]; 
+        /*stringstream strValue;
+        strValue <<*azResult[5];
         //std::string s= *azResult[5];
         int num;//= atoi(s.c_str());
         strValue>>num;
@@ -167,7 +167,7 @@ class database {
         zhi = bad_max_score;
       }
       sqlite3_free_table(azResult);
-   
+
    return gotten;
     }
 
@@ -184,13 +184,13 @@ class database {
     return o;
     }
 
-	pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white){
+    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white){
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-	  out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
     std::string result = out.str();
-		sql = result.c_str();
+        sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
     //std::cout << "a.front() is" << &a.front() <<"\n";
     //std::cout << "my vector contains:"<<a<<std::endl;
@@ -201,19 +201,19 @@ class database {
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
     }else{
-			//std::cerr << va.size()<<"returned.\n";
+            //std::cerr << va.size()<<"returned.\n";
       }
       //fprintf(stdout, "Looked through board successfully\n");
-		return v_score; 
-	}
-	
+        return v_score;
+    }
+
   bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white){
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
     const char *select = "HI, LO";
-    const char *b = "BOARD"; 
+    const char *b = "BOARD";
     int depth = board.depth;
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white);
