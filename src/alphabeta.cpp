@@ -189,7 +189,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 children_aborted = true;
             }
 
-            child_task->join();
+            //child_task->join();
             if(child_info->get_abort()) 
                 continue;
             val = -child_info->result;
