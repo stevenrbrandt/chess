@@ -18,7 +18,7 @@
 
 using namespace std;
 //using something = std::vector<std::string>;
-using pseudo = std::vector<char*>;
+using pseudo = std::vector<std::string>;
 
 class database {
   public:
@@ -73,7 +73,7 @@ class database {
 
 //destructor
     ~database(){
-      //get_data();
+     // get_data();
       sqlite3_close(db);
       cout<<"database closed. \n";
     }
@@ -84,7 +84,7 @@ class database {
     DECL_SCORE(s, ev.eval(board, chosen_evaluator), board.hash)
     return s;
   }
-
+/*
   void deleteAll(){
     const char *sql;
     std::ostringstream o;
@@ -94,10 +94,10 @@ class database {
     rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
     if ( rc == SQLITE_OK) cout<<"MoveSet sucessfully reset";
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
-    }
-
+  }
+*/
     void add_data(const node_t& board, score_t lo, score_t hi, bool white){
-     // cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
+      //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
       auto hash= board.hash;
      const char *sql;    //maybe find a way to make work without const
@@ -121,9 +121,11 @@ class database {
       }else{
         //fprintf(stdout, "Records created sucessfully\n");
       }
+      if (board.depth>3){
+        cout<<"Adding depth of "<<board.depth<<endl;}
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
-    int get_data(){
+/*    int get_data(){
       const char *data= "Callback function called";
       const char *sql= "SELECT * from MoveSet";
       rc= sqlite3_exec(db, sql, 0, (void*)data, &zErrMsg);
@@ -134,14 +136,14 @@ class database {
          fprintf(stdout, "Operation done  sucessfully\n");
          return 0;
     }
-
+*/
     bool get_database_value(const node_t& board, score_t& zlo, score_t& zhi, bool white){
       bool gotten = false;
       const char *sql;
       std::ostringstream current, out;
       print_board(board, current, true);
       std::string curr = current.str();
-      out<< "SELECT LO, HI, PLY FROM "<<( white ? "white" :"black")<<" WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\"<"<<board.depth<<";";
+      out<< "SELECT LO, HI, PLY FROM "<<( white ? "white" :"black")<<" WHERE \"BOARD\"=\""<<curr<<"\" AND \"PLY\">"<<board.depth<<";";
       std::string result = out.str();
       sql=result.c_str();
       int nrow, ncolumn;
@@ -188,7 +190,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\">"<<board.depth<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -217,12 +219,11 @@ class database {
     int depth = board.depth;
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white);
-    if (! v_score.empty()){
-      if (score_board(board) < atoi(v_score[1])){
-       int zhi = atoi(v_score[0]);
-       int zlow= atoi(v_score[1]);
-       lower = zlow;
-       upper = zhi;
+    if (v_score.size() == 2){
+      if (score_board(board) < atoi(v_score.at(1).c_str())){
+       lower =  atoi(v_score.at(0).c_str());
+       upper =  atoi(v_score.at(1).c_str());
+       cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }
@@ -235,7 +236,8 @@ class database {
 
     //callback used for select operation
     static int callback(void *Used, int argc, char **argvalue, char **azColName){
-       pseudo* v_score=static_cast<pseudo*>(Used);
+        cout<<"callback is called"<<endl;
+        pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);

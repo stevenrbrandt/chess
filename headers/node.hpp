@@ -25,7 +25,8 @@ struct base_node_t {
     
     /* the number of moves since a capture or pawn chess_move, used to handle the fifty-chess_move-draw rule */
     int fifty;
-    
+    //counts number of moves
+    int move_num;
     int ply;
     int hply;
     //std::vector<hash_t> hist_dat;

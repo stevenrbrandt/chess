@@ -33,6 +33,7 @@ void init_board(node_t& board)
     board.castle = 15;
     board.ep = -1;
     board.fifty = 0;
+    board.move_num = 0;
     board.ply = 0;
     board.hply = 0;
     board.hist_dat.resize(10);
@@ -448,11 +449,13 @@ bool makemove(node_t& board,chess_move& m)
     }
     else
         board.ep = -1;
-    if (m.getBits() & 17)
+    if (m.getBits() & 17){
         board.fifty = 0;
-    else
+        board.move_num++;}
+    else{ 
         board.fifty++;
-
+        board.move_num++;
+    }
     /* move the piece */
     board.color[m.getTo()] = board.side;
     if (m.getBits() & 32)
