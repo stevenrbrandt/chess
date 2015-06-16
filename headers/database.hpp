@@ -73,7 +73,7 @@ class database {
 
 //destructor
     ~database(){
-      get_data();
+      //get_data();
       sqlite3_close(db);
       cout<<"database closed. \n";
     }
