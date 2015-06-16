@@ -72,6 +72,7 @@ score_t qeval(boost::shared_ptr<search_info> info)
     score_t upper = info->beta;
     evaluator ev;
     DECL_SCORE(s,ev.eval(board, chosen_evaluator),board.hash);
+    return s;
     s = max(lower,s);
     std::vector<chess_move> workq;
     gen(workq, board); // Generate the moves

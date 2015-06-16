@@ -192,16 +192,10 @@ class database {
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
-    //std::cout << "a.front() is" << &a.front() <<"\n";
-    //std::cout << "my vector contains:"<<a<<std::endl;
-    //for (unsigned i=0; i<a.size(); i++)
-      //std::cout<< ' '<< a.at(i).argv;
-    //std::cout<<'\n';
     if (rc!= SQLITE_OK){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
     }else{
-            //std::cerr << va.size()<<"returned.\n";
       }
       //fprintf(stdout, "Looked through board successfully\n");
         return v_score;
@@ -216,12 +210,16 @@ class database {
     const char *b = "BOARD";
     int depth = board.depth;
     std::ostringstream search;
+    if (board.depth==3){
+    evaluator ev;
+    DECL_SCORE(s, ev.eval(board, chosen_evaluator),board.hash);
+    cout<< "This is the score" << s<<"depth"<<depth<<endl;}
     pseudo v_score = search_board(board, search, select, b, curr, white);
     if (v_score.size() == 2){
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atoi(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
-       cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
+      // cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }
@@ -234,16 +232,16 @@ class database {
 
     //callback used for select operation
     static int callback(void *Used, int argc, char **argvalue, char **azColName){
-        cout<<"callback is called"<<endl;
+        //cout<<"callback is called"<<endl;
         pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);
-        for (unsigned int i=0; i<v_score->size();i++){
+        /*for (unsigned int i=0; i<v_score->size();i++){
           if (!v_score->empty()){
             std::cout<< i <<"v_score " <<(*v_score)[i]<<endl;
             }
-        }
+        }*/
         //args (a){argvalue[argc-2],argvalue[argc-1]};
         //std::cout<<a<<std::endl;
         return 0;
