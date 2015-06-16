@@ -94,7 +94,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t zlo = bad_min_score,zhi = bad_max_score;
     bool white =board.side == LIGHT;
     bool temp;
-    if (board.side==LIGHT && board.depth > 1)
+    if (board.side==LIGHT )
       temp = dbase.get_transposition_value (board, zlo, zhi, white);
 	  else
       temp = get_transposition_value (board, zlo, zhi);
@@ -257,7 +257,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     }
 
     if(store) {
-      if (board.side==LIGHT && board.depth > 2) {
+      if (board.side==LIGHT ) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white);
       } else {
