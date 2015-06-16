@@ -238,6 +238,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         return z;
     }
     white = board.side ==LIGHT;
+    if (board.depth > 3)
 	  dbase.add_data(board,
         max(zlo,max_val >= beta  ? max_val : bad_min_score),
         min(zhi,max_val < alpha ? max_val : bad_max_score), white);
