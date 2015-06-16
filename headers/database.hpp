@@ -184,11 +184,11 @@ class database {
     return o;
     }
 
-    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white){
+    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s){
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\"="<<board.depth<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? "<": "=") <<board.depth<<" AND \"LO\" > "<< s<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -210,11 +210,12 @@ class database {
     const char *b = "BOARD";
     int depth = board.depth;
     std::ostringstream search;
-    if (board.depth==3){
+    score_t s;
+    if (board.depth==3){    
     evaluator ev;
     DECL_SCORE(s, ev.eval(board, chosen_evaluator),board.hash);
     cout<< "This is the score" << s<<"depth"<<depth<<endl;}
-    pseudo v_score = search_board(board, search, select, b, curr, white);
+    pseudo v_score = search_board(board, search, select, b, curr, white, s);
     if (v_score.size() == 2){
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atoi(v_score.at(1).c_str());
