@@ -94,12 +94,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
     bool white =board.side == LIGHT;
-    bool temp;
+    bool entry_found;
     if (board.side==LIGHT )
-      temp = dbase.get_transposition_value (board, zlo, zhi, white,p_board);
-	  else
-      temp = get_transposition_value (board, zlo, zhi);
-    if (temp) {
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board);
+	  if(!entry_found)
+      entry_found = get_transposition_value (board, zlo, zhi);
+    if (entry_found) {
         if(zlo >= beta) {
             stop = true;
             return zlo;
