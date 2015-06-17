@@ -10,6 +10,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
+#include "score.hpp"
 #include "defs.hpp"
 #include "hash.hpp"
 #include "FixedVec.hpp"
@@ -27,7 +28,7 @@ struct base_node_t {
     int fifty;
     //counts number of moves
     int move_num;
-    int p_board;
+    score_t p_board;
     int ply;
     int hply;
     //std::vector<hash_t> hist_dat;
