@@ -27,6 +27,7 @@ struct base_node_t {
     int fifty;
     //counts number of moves
     int move_num;
+    int p_board;
     int ply;
     int hply;
     //std::vector<hash_t> hist_dat;

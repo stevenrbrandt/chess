@@ -201,7 +201,7 @@ class database {
         return v_score;
     }
 
-  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white){
+  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board){
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
@@ -210,12 +210,7 @@ class database {
     const char *b = "BOARD";
     int depth = board.depth;
     std::ostringstream search;
-    score_t s;
-    if (board.depth==3){    
-    evaluator ev;
-    DECL_SCORE(s, ev.eval(board, chosen_evaluator),board.hash);
-    cout<< "This is the score" << s<<"depth"<<depth<<endl;}
-    pseudo v_score = search_board(board, search, select, b, curr, white, s);
+    pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
     if (v_score.size() == 2){
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atoi(v_score.at(1).c_str());

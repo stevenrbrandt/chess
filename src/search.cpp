@@ -147,6 +147,10 @@ boost::shared_ptr<task> parallel_task(int depth, bool *parallel) {
 // think() calls a search function 
 int think(node_t& board,bool parallel)
 {
+  evaluator ev;
+  DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
+  board.p_board = curr;
+  std::cout<< "This is curr" <<curr<<std::endl;
   boost::shared_ptr<task> root{new serial_task};
 #ifdef PV_ON
   pv.clear();
@@ -171,8 +175,6 @@ int think(node_t& board,bool parallel)
     info->board = board;
     info->depth = depth[board.side];
     score_t f = search(info);
-    bool stop = info->stop;
-    std::cout<< "This is the bool" << stop <<std::endl;
 
     assert(move_to_make != INVALID_MOVE);
     if (bench_mode)
@@ -192,8 +194,6 @@ int think(node_t& board,bool parallel)
     info->alpha = alpha;
     info->beta = beta;
     score_t f(search_ab(info));
-    bool stop = info->stop;
-    std::cout<<"This is the bool" << stop<<std::endl;
     while(d < depth[board.side]) {
         d+=stepsize;
         board.depth = d;
@@ -219,14 +219,13 @@ int think(node_t& board,bool parallel)
     {
       board.depth = i;
       boost::shared_ptr<search_info> info{new search_info};
+      //info->printed_board = curr;
       info->board = board;
       info->depth = i;
       info->alpha = alpha;
       info->beta = beta;
-      bool stop = info-> stop;
-      std::cout<< "This is bool" << stop << std::endl;
+      bool stop = info-> stop; 
       f = search_ab(info);
-
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
