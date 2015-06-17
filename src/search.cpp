@@ -230,6 +230,7 @@ int think(node_t& board,bool parallel)
       root = new_root;
     }
 
+    /*
     if (brk) {
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
@@ -238,6 +239,7 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       f=search_ab(info);
     }
+    */
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
   }
