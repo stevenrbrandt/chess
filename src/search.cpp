@@ -171,7 +171,9 @@ int think(node_t& board,bool parallel)
     info->board = board;
     info->depth = depth[board.side];
     score_t f = search(info);
-    
+    bool stop = info->stop;
+    std::cout<< "This is the bool" << stop <<std::endl;
+
     assert(move_to_make != INVALID_MOVE);
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
@@ -190,6 +192,8 @@ int think(node_t& board,bool parallel)
     info->alpha = alpha;
     info->beta = beta;
     score_t f(search_ab(info));
+    bool stop = info->stop;
+    std::cout<<"This is the bool" << stop<<std::endl;
     while(d < depth[board.side]) {
         d+=stepsize;
         board.depth = d;
@@ -219,6 +223,8 @@ int think(node_t& board,bool parallel)
       info->depth = i;
       info->alpha = alpha;
       info->beta = beta;
+      bool stop = info-> stop;
+      std::cout<< "This is bool" << stop << std::endl;
       f = search_ab(info);
 
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break

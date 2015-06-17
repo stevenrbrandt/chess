@@ -188,7 +188,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? "<": "=") <<board.depth<<" AND \"LO\" > "<< s<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -220,7 +220,7 @@ class database {
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atoi(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
-      // cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
+       cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }

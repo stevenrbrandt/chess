@@ -65,6 +65,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t alpha = proc_info->alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
+    bool stop = proc_info->stop;
     // if we are a leaf node, return the value from the eval() function
     if (depth == 0)
     {
@@ -100,9 +101,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       temp = get_transposition_value (board, zlo, zhi);
     if (temp) {
         if(zlo >= beta) {
+            stop = true;
             return zlo;
         }
         if(alpha >= zhi) {
+            stop = true;
             return zhi;
         }
         alpha = max(zlo,alpha);
