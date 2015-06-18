@@ -150,7 +150,6 @@ int think(node_t& board,bool parallel)
   evaluator ev;
   DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
   board.p_board = curr;
-  std::cout<< "This is curr" <<curr<<std::endl;
   boost::shared_ptr<task> root{new serial_task};
 #ifdef PV_ON
   pv.clear();
@@ -219,7 +218,6 @@ int think(node_t& board,bool parallel)
     {
       board.depth = i;
       boost::shared_ptr<search_info> info{new search_info};
-      //info->printed_board = curr;
       info->board = board;
       info->depth = i;
       info->alpha = alpha;

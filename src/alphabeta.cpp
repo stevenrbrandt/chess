@@ -96,16 +96,16 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found;
     if (board.side==LIGHT )
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board);
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth);
+      
+      stop = true;
 	  if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
     if (entry_found) {
         if(zlo >= beta) {
-            stop = true;
             return zlo;
         }
         if(alpha >= zhi) {
-            stop = true;
             return zhi;
         }
         alpha = max(zlo,alpha);

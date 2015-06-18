@@ -201,19 +201,20 @@ class database {
         return v_score;
     }
 
-  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board){
+  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board, int depth){
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
-    const char *select = "HI, LO";
+    const char *select = "HI, LO, PLY";
     const char *b = "BOARD";
-    int depth = board.depth;
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
-    if (v_score.size() == 2){
+    if (v_score.size() == 3){
+      int return_ply = atoi(v_score.at(2).c_str());
+      cout<<"Additive ply of: " << return_ply+depth<<endl;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
-       lower =  atoi(v_score.at(1).c_str());
+       lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
        cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
@@ -231,13 +232,9 @@ class database {
         //cout<<"callback is called"<<endl;
         pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
+        v_score->push_back(argvalue[argc-3]);
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);
-        /*for (unsigned int i=0; i<v_score->size();i++){
-          if (!v_score->empty()){
-            std::cout<< i <<"v_score " <<(*v_score)[i]<<endl;
-            }
-        }*/
         //args (a){argvalue[argc-2],argvalue[argc-1]};
         //std::cout<<a<<std::endl;
         return 0;

@@ -132,7 +132,7 @@ int chx_main()
                     << std::endl;
             if (pgn_enabled)
                 pgn_output(board, move_to_make);
-            cout<<"Move number: "<<board.move_num<<endl;
+            cout<<"Ply number: "<<board.move_num<<endl;
             makemove(board, move_to_make); // Make the chess_move for our master board
             board.ply = 0; // Reset the board ply to 0
 
