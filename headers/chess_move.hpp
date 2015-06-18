@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <string>
+
 /* This is the basic description of a chess_move. promote is what
    piece to promote the pawn to, if the chess_move is a pawn
    promotion. bits is a bitfield that describes the chess_move,
