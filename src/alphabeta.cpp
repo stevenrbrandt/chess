@@ -65,7 +65,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t alpha = proc_info->alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
-    bool stop = proc_info->stop;
+    proc_info->stop= false;
     // if we are a leaf node, return the value from the eval() function
     if (depth == 0)
     {
@@ -93,12 +93,21 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t max_val = bad_min_score;
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
+<<<<<<< HEAD
     bool white = board.side == LIGHT;
     bool entry_found;
     if (board.side==LIGHT )
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth); 
       stop = true;
 	  if(!entry_found)
+=======
+    bool white =board.side == LIGHT;
+    bool entry_found, deeper  ;
+    if (board.side==LIGHT )
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth, deeper); 
+	  //cout<<"deeper="<<deeper<<endl; 
+    if(!entry_found)
+>>>>>>> refs/remotes/origin/master
       entry_found = get_transposition_value (board, zlo, zhi);
     if (entry_found) {
         if(zlo >= beta) {
@@ -139,9 +148,15 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             chess_move g = workq[j++];
 
             boost::shared_ptr<search_info> child_info{new search_info(board)};
-
             bool parallel;
-            if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
+            if (deeper) {
+              cout<<"deeper ="<<deeper<< " depth= "<<depth<<endl;
+              //aborted =true;
+              max_move=  child_info->mv;
+              //children_aborted=true;
+              child_info-> stop = true;
+              break; 
+            }else if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
 
                 parallel = j > 0 && !capture(board,g);
                 boost::shared_ptr<task> t = parallel_task(depth, &parallel);
@@ -173,6 +188,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                     break;
             }
         }
+        if (deeper){          
+          break;
+        }
         When when(tasks);
         size_t const count = tasks.size();
         for(size_t n_=0;n_<count;n_++) {
@@ -186,7 +204,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             if(!children_aborted && (aborted || child_info->get_abort())) {
                 for(unsigned int m = 0;m < tasks.size();m++) {
-                    tasks[m]->info->set_abort(true);
+                     tasks[m]->info->set_abort(true);
                 }
                 children_aborted = true;
             }
@@ -195,8 +213,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             if(child_info->get_abort()) 
                 continue;
             val = -child_info->result;
-
-            if (val > max_val) {
+            
+            if (deeper){
+              max_move = child_info->mv;
+               break;
+            } else if (val > max_val) {
                 max_val = val;
                 max_move = child_info->mv;
                 if (val > alpha)
@@ -232,7 +253,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         }
     }
 
-    if (board.ply == 0) {
+    if (board.ply == 0 || deeper) {
         assert(max_move != INVALID_MOVE);
         ScopedLock s(cmutex);
         move_to_make = max_move;
@@ -243,10 +264,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         DECL_SCORE(z,0,board.hash);
         return z;
     }
-
     bool store = true;
     score_t lo, hi;
-    if(max_val <= alpha) {
+    if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
     } else if(alpha < max_val && max_val < beta) {
