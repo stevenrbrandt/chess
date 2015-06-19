@@ -65,7 +65,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t alpha = proc_info->alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
-    proc_info->stop= false;
+    //proc_info->stop= false;
     // if we are a leaf node, return the value from the eval() function
     if (depth == 0)
     {
@@ -102,10 +102,16 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 	  if(!entry_found)
 =======
     bool white =board.side == LIGHT;
-    bool entry_found, deeper  ;
+    bool entry_found, deeper;
+    if (proc_info->stop == false) {
     if (board.side==LIGHT )
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth, deeper); 
-	  //cout<<"deeper="<<deeper<<endl; 
+    if (deeper){
+      proc_info->stop=true;
+    }
+    
+    cout<<"deeper ="<<proc_info->stop<<endl;  
+   
     if(!entry_found)
 >>>>>>> refs/remotes/origin/master
       entry_found = get_transposition_value (board, zlo, zhi);
@@ -119,7 +125,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         alpha = max(zlo,alpha);
         beta  = min(zhi,beta);
     }
-    if(alpha >= beta) {
+    }
+    if(alpha >= beta || proc_info->stop) {
+        proc_info->stop=false;
+        deeper= false; 
         return alpha;
     }
 
@@ -151,11 +160,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             bool parallel;
             if (deeper) {
               cout<<"deeper ="<<deeper<< " depth= "<<depth<<endl;
-              //aborted =true;
               max_move=  child_info->mv;
-              //children_aborted=true;
-              child_info-> stop = true;
-              break; 
+              //break; 
             }else if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
 
                 parallel = j > 0 && !capture(board,g);
@@ -189,7 +195,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             }
         }
         if (deeper){          
-          break;
+       //   break;
         }
         When when(tasks);
         size_t const count = tasks.size();
@@ -216,7 +222,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             
             if (deeper){
               max_move = child_info->mv;
-               break;
+            //  break;
             } else if (val > max_val) {
                 max_val = val;
                 max_move = child_info->mv;
