@@ -65,7 +65,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t alpha = proc_info->alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
-    //proc_info->stop= false;
     // if we are a leaf node, return the value from the eval() function
     if (depth == 0)
     {
@@ -93,14 +92,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t max_val = bad_min_score;
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
-<<<<<<< HEAD
-    bool white = board.side == LIGHT;
-    bool entry_found;
-    if (board.side==LIGHT )
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth); 
-      stop = true;
-	  if(!entry_found)
-=======
     bool white =board.side == LIGHT;
     bool entry_found, deeper;
     if (proc_info->stop == false) {
@@ -108,12 +99,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth, deeper); 
     if (deeper){
       proc_info->stop=true;
+      cout<<"deeper = "<<proc_info->stop<<endl;
     }
     
-    cout<<"deeper ="<<proc_info->stop<<endl;  
+      
    
     if(!entry_found)
->>>>>>> refs/remotes/origin/master
       entry_found = get_transposition_value (board, zlo, zhi);
     if (entry_found) {
         if(zlo >= beta) {
@@ -126,9 +117,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         beta  = min(zhi,beta);
     }
     }
-    if(alpha >= beta || proc_info->stop) {
-        proc_info->stop=false;
-        deeper= false; 
+    if(alpha >= beta || deeper) {
+        //proc_info->stop=false;
+        //deeper= false; 
         return alpha;
     }
 
@@ -151,7 +142,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool aborted = false;
     bool children_aborted = false;
     // loop through the moves
-    //for (; j < worksq; j++) {
+    //for (; j < worksq; j++) 
     while(j < worksq) {
         while(j < worksq) {
             chess_move g = workq[j++];
@@ -163,7 +154,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
               max_move=  child_info->mv;
               //break; 
             }else if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
-
+            
                 parallel = j > 0 && !capture(board,g);
                 boost::shared_ptr<task> t = parallel_task(depth, &parallel);
 
@@ -194,9 +185,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                     break;
             }
         }
-        if (deeper){          
-       //   break;
-        }
+
         When when(tasks);
         size_t const count = tasks.size();
         for(size_t n_=0;n_<count;n_++) {
@@ -208,6 +197,17 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             tasks.erase(tasks.begin()+n);
 
+            if (deeper){          
+              if (val > alpha) {
+                  alpha = val;
+                  if(!child_info->get_abort())
+                      pv[board.ply].set(child_info->mv);
+                  if (alpha >= beta) {
+                        aborted = true;
+                        break;
+                  }
+              } 
+            }
             if(!children_aborted && (aborted || child_info->get_abort())) {
                 for(unsigned int m = 0;m < tasks.size();m++) {
                      tasks[m]->info->set_abort(true);
@@ -220,10 +220,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 continue;
             val = -child_info->result;
             
-            if (deeper){
-              max_move = child_info->mv;
-            //  break;
-            } else if (val > max_val) {
+            if (val > max_val) {
                 max_val = val;
                 max_move = child_info->mv;
                 if (val > alpha)
@@ -243,8 +240,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         if(alpha >= beta) {
             break;
         }
-    }
-
+    
+  }
     // no legal moves? then we're in checkmate or stalemate
     if (max_move == INVALID_MOVE) {
         if (in_check(board, board.side))
@@ -257,19 +254,22 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             DECL_SCORE(z,0,board.hash);
             return z;
         }
-    }
-
+    
+}
     if (board.ply == 0 || deeper) {
         assert(max_move != INVALID_MOVE);
         ScopedLock s(cmutex);
         move_to_make = max_move;
+        //deeper = false;
+        //proc_info->stop= false;
     }
 
     // fifty chess_move draw rule
     if (board.fifty >= 100) {
         DECL_SCORE(z,0,board.hash);
-        return z;
+        return z;    
     }
+    
     bool store = true;
     score_t lo, hi;
     if (max_val <= alpha){

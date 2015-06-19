@@ -214,12 +214,12 @@ class database {
     if (v_score.size() == 3){
       int return_ply = atoi(v_score.at(2).c_str());
       additive_ply= return_ply+depth;
-      cout<<"Additive ply of: " <<additive_ply<<endl;
+      cout<<"Additive ply of: " <<return_ply<<endl;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
        cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
-        gotten= true;
+       gotten= true;
        }
      }
     else {
@@ -227,8 +227,8 @@ class database {
       upper = bad_max_score;
     }
     deeper= false;
-    if (additive_ply>depth)
-      deeper=true;
+    if (additive_ply>3){
+      deeper=true;}
     return gotten;
   }
 
