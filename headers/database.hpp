@@ -40,13 +40,13 @@ class database {
         rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, &zErrMsg);
         /* Create SQL statement */
         sql = "CREATE TABLE  white("  \
-        "PLY              INTEGER     NOT NULL," \
+        "DEPTH            INTEGER     NOT NULL," \
         "BOARD               TEXT     NOT NULL,"\
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
-        "EXCESS           INTEGER     NOT NULL,"\
-        "PRIMARY KEY (PLY, BOARD));";
+        "SUMDEPTH         INTEGER     NOT NULL,"\
+        "PRIMARY KEY (DEPTH, BOARD));";
        //Execute SQL statement
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
@@ -56,13 +56,13 @@ class database {
             fprintf(stdout, "Table created successfully\n");
         }
         sql = "CREATE TABLE black("  \
-        "PLY              INTEGER     NOT NULL," \
+        "DEPTH            INTEGER     NOT NULL," \
         "BOARD               TEXT     NOT NULL,"\
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
-        "EXCESS           INTEGER     NOT NULL,"\
-        "PRIMARY KEY (PLY, BOARD));";
+        "SUMDEPTH         INTEGER     NOT NULL,"\
+        "PRIMARY KEY (DEPTH, BOARD));";
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
@@ -100,7 +100,7 @@ class database {
 */
     void add_data(const node_t& board, score_t lo, score_t hi, bool white, int excess){
       //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
-      int ply = board.depth;
+      int depth = board.depth;
       auto hash= board.hash;
      const char *sql;    //maybe find a way to make work without const
       //create SQL statement from string into char * array
@@ -110,7 +110,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<ply<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess<<");";
+      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<depth+excess<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
@@ -190,7 +190,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY PLY, EXCESS ASC"<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"DEPTH\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY SUMDEPTH"<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -208,16 +208,16 @@ class database {
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
-    const char *select = "HI, LO, PLY, EXCESS";
+    const char *select = "HI, LO, DEPTH, SUMDEPTH";
     const char *b = "BOARD";
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
     if (v_score.size() == 4){
-      int db_excess = atoi(v_score.at(3).c_str());
+      int sum_depth = atoi(v_score.at(3).c_str());
       int return_ply = atoi(v_score.at(2).c_str());
       int excess= return_ply-depth;
       board.excess_depth = excess;
-      cout<<"Additive ply of: " <<return_ply+depth+db_excess<<endl;
+      cout<<"Additive depth of: " <<sum_depth+depth<<endl;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
