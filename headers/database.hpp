@@ -45,6 +45,7 @@ class database {
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
+        "EXCESS           INTEGER     NOT NULL,"\
         "PRIMARY KEY (PLY, BOARD));";
        //Execute SQL statement
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
@@ -60,6 +61,7 @@ class database {
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
+        "EXCESS           INTEGER     NOT NULL,"\
         "PRIMARY KEY (PLY, BOARD));";
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
@@ -96,7 +98,7 @@ class database {
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
   }
 */
-    void add_data(const node_t& board, score_t lo, score_t hi, bool white){
+    void add_data(const node_t& board, score_t lo, score_t hi, bool white, int excess){
       //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int ply = board.depth;
       auto hash= board.hash;
@@ -108,7 +110,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<ply<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<<");";
+      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<ply<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
@@ -188,7 +190,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"PLY\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY PLY, EXCESS ASC"<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -206,15 +208,16 @@ class database {
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
-    const char *select = "HI, LO, PLY";
+    const char *select = "HI, LO, PLY, EXCESS";
     const char *b = "BOARD";
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
-    if (v_score.size() == 3){
+    if (v_score.size() == 4){
+      int db_excess = atoi(v_score.at(3).c_str());
       int return_ply = atoi(v_score.at(2).c_str());
       int excess= return_ply-depth;
       board.excess_depth = excess;
-      cout<<"Additive ply of: " <<return_ply+depth<<endl;
+      cout<<"Additive ply of: " <<return_ply+depth+db_excess<<endl;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
@@ -235,6 +238,7 @@ class database {
         //cout<<"callback is called"<<endl;
         pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
+        v_score->push_back(argvalue[argc-4]);
         v_score->push_back(argvalue[argc-3]);
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);

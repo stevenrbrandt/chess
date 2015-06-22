@@ -292,7 +292,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     if(store) {
       if (board.side==LIGHT ) {
         white = board.side ==LIGHT;
-        dbase.add_data(board,lo,hi,white);
+        dbase.add_data(board,lo,hi,white,board.excess_depth);
       } else {
         set_transposition_value(board,lo,hi);
       }
