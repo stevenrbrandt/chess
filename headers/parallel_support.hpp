@@ -45,7 +45,7 @@ public:
     score_t alpha;
     score_t beta;
     score_t printed_board;
-    bool stop;
+    int excess;
     search_info(const node_t& board_) : abort_flag_(false), abort_flag(&abort_flag_), board(board_),
             result(bad_min_score) {
     }

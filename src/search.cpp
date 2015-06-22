@@ -224,10 +224,7 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       //bool stop = info-> stop; 
       f = search_ab(info);
-      bool stop = info-> stop;
-      if (stop){
-        
-      }
+
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;

@@ -93,13 +93,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
     bool white =board.side == LIGHT;
-    bool entry_found, deeper;
-    if (proc_info->stop == false) {
+    bool entry_found;
     if (board.side==LIGHT )
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth, deeper); 
-    if (deeper){
-      proc_info->stop=true;
-      cout<<"deeper = "<<proc_info->stop<<endl;
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,depth);
+    if (board.excess_depth>0){
+      int excess_depth = board.excess_depth;
+      proc_info->excess = excess_depth;
     }
     
       
@@ -116,16 +115,18 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         alpha = max(zlo,alpha);
         beta  = min(zhi,beta);
     }
-    }
-    if(alpha >= beta || deeper) {
+    
+    if(alpha >= beta) {
         //proc_info->stop=false;
-        //deeper= false; 
+        //deeper= false;
         return alpha;
     }
 
     std::vector<chess_move> workq;
     chess_move max_move;
     max_move = INVALID_MOVE; 
+    chess_move db_move;
+    
 
     gen(workq, board); // Generate the moves
 
@@ -138,7 +139,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
     int j=0;
     score_t val;
-
     bool aborted = false;
     bool children_aborted = false;
     // loop through the moves
@@ -149,11 +149,13 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             boost::shared_ptr<search_info> child_info{new search_info(board)};
             bool parallel;
-            if (deeper) {
-              cout<<"deeper ="<<deeper<< " depth= "<<depth<<endl;
-              max_move=  child_info->mv;
-              //break; 
-            }else if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
+            if (board.excess_depth > 0) {
+              //cout<<"Found max_move with excess_depth"<<endl;
+              db_move = g;
+              //cout<<"deeper ="<<deeper<< " depth= "<<depth<<endl;
+              //max_move = child_info->mv;
+              //if statement or global variable to compare to mv 
+            }if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
             
                 parallel = j > 0 && !capture(board,g);
                 boost::shared_ptr<task> t = parallel_task(depth, &parallel);
@@ -197,17 +199,17 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             tasks.erase(tasks.begin()+n);
 
-            if (deeper){          
+            /*if (excess_depth>0){          
               if (val > alpha) {
                   alpha = val;
                   if(!child_info->get_abort())
                       pv[board.ply].set(child_info->mv);
                   if (alpha >= beta) {
                         aborted = true;
-                        break;
+                        continue;
                   }
               } 
-            }
+            }*/
             if(!children_aborted && (aborted || child_info->get_abort())) {
                 for(unsigned int m = 0;m < tasks.size();m++) {
                      tasks[m]->info->set_abort(true);
@@ -220,8 +222,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 continue;
             val = -child_info->result;
             
-            if (val > max_val) {
+            if (val > max_val || board.excess_depth>0) {
                 max_val = val;
+                if (board.excess_depth>0)
+                  max_move = db_move; 
+                else
                 max_move = child_info->mv;
                 if (val > alpha)
                 {
@@ -256,7 +261,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         }
     
 }
-    if (board.ply == 0 || deeper) {
+    if (board.ply == 0 || board.depth>0) {
         assert(max_move != INVALID_MOVE);
         ScopedLock s(cmutex);
         move_to_make = max_move;

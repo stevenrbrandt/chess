@@ -20,6 +20,7 @@ struct base_node_t {
     char color[64];
     char piece[64];
     int depth;
+    int excess_depth = 0;
     int side;
     int castle;
     int ep;

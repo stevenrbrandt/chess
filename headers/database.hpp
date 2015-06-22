@@ -201,7 +201,7 @@ class database {
         return v_score;
     }
 
-  bool get_transposition_value(const node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board, int depth, bool& deeper){
+  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board, int depth){
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
@@ -210,11 +210,11 @@ class database {
     const char *b = "BOARD";
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
-    int additive_ply= depth;
     if (v_score.size() == 3){
       int return_ply = atoi(v_score.at(2).c_str());
-      additive_ply= return_ply+depth;
-      cout<<"Additive ply of: " <<return_ply<<endl;
+      int excess= return_ply-depth;
+      board.excess_depth = excess;
+      cout<<"Additive ply of: " <<return_ply+depth<<endl;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
@@ -226,9 +226,7 @@ class database {
       lower = bad_min_score;
       upper = bad_max_score;
     }
-    deeper= false;
-    if (additive_ply>3){
-      deeper=true;}
+    //deeper= false;
     return gotten;
   }
 
