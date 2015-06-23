@@ -277,7 +277,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     
     bool store = true;
     score_t lo, hi;
-    if (max_val <= alpha){
+    if(board.excess_depth > 0) {
+      lo = val;
+      hi = max_score;
+    } if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
     } else if(alpha < max_val && max_val < beta) {
@@ -293,9 +296,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       if (board.side==LIGHT ) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,board.excess_depth);
-      } else {
-        set_transposition_value(board,lo,hi);
       }
+      set_transposition_value(board,lo,hi);
     }
     return max_val;
 }

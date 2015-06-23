@@ -190,7 +190,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"DEPTH\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY SUMDEPTH"<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"SUMDEPTH\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY SUMDEPTH"<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -238,10 +238,15 @@ class database {
         //cout<<"callback is called"<<endl;
         pseudo* v_score=static_cast<pseudo*>(Used);
         v_score->clear();
+        /*
         v_score->push_back(argvalue[argc-4]);
         v_score->push_back(argvalue[argc-3]);
         v_score->push_back(argvalue[argc-2]);
         v_score->push_back(argvalue[argc-1]);
+        */
+        for(int i=0;i<argc;i++) {
+          v_score->push_back(argvalue[i]);
+        }
         //args (a){argvalue[argc-2],argvalue[argc-1]};
         //std::cout<<a<<std::endl;
         return 0;
