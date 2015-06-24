@@ -123,9 +123,9 @@ int chx_main()
             int end = get_ms();
             if (move_to_make.get32BitMove() == 0) {
                 std::cout << "(no legal moves)" << std::endl;
+                auto_move = 0;
                 computer_side = EMPTY;
-                //continue;
-                break;
+                continue;
             }
             if (output)
                 std::cout << "Computer's chess_move: " << move_to_make.str() << " time=" << std::setprecision(3) << 1e-3*(end-start) << " sec"
