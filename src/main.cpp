@@ -58,6 +58,7 @@ void chx_terminate() {
 /* chx_main() processes input from stdin */
 
 int auto_move = 0;
+int move_count = 0;
 int computer_side;
 
 bool pgn_enabled = false;
@@ -124,6 +125,7 @@ int chx_main()
             if (move_to_make.get32BitMove() == 0) {
                 std::cout << "(no legal moves)" << std::endl;
                 auto_move = 0;
+                std::cout << "Something is broken!" << std::endl;
                 computer_side = EMPTY;
                 continue;
             }
@@ -155,7 +157,10 @@ int chx_main()
         if (auto_move)
         {
             computer_side = board.side;
-            continue;
+            if(move_count-- > 0)
+              continue;
+            else
+              auto_move = 0;
         }
         // get user input
         std::string s;
@@ -190,8 +195,14 @@ int chx_main()
         }
         if (input[0] == "auto") {
             computer_side = board.side;
+            try {
+              move_count = atoi(input.at(1).c_str());
+            }
+            catch (out_of_range&) {
+              move_count = 100000;
+            }
             auto_move = 1;
-            auto_move = print_result(workq, board);
+            print_result(workq, board);
             continue;
         }
 #ifdef HPX_SUPPORT
