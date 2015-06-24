@@ -48,6 +48,7 @@ class database {
         "SUMDEPTH         INTEGER     NOT NULL,"\
         "PRIMARY KEY (DEPTH, BOARD));";
        //Execute SQL statement
+        cout << "SQL: "<< sql << endl;
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
@@ -110,7 +111,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO \""<< (white ? "white" : "black") <<"\" VALUES ("<<depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<depth+excess<<");";
+      o<< "INSERT OR REPLACE INTO "<< (white ? "white" : "black") <<" (depth, board, hi, lo, hash, sumdepth) VALUES ("<<depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess+depth<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
@@ -203,8 +204,9 @@ class database {
         return v_score;
     }
 
-  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board, int depth){
+  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& max_depth){
     bool gotten = false;
+    int depth = board.depth;
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
@@ -214,10 +216,9 @@ class database {
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
     if (v_score.size() == 4){
       int sum_depth = atoi(v_score.at(3).c_str());
-      int return_ply = atoi(v_score.at(2).c_str());
-      int excess= return_ply-depth;
-      board.excess_depth = excess;
-      cout<<"Additive depth of: " <<sum_depth+depth<<endl;
+      int return_depth = atoi(v_score.at(2).c_str());
+      //int excess= sum_depth-depth;
+      max_depth = sum_depth;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atoi(v_score.at(0).c_str());
@@ -226,6 +227,7 @@ class database {
        }
      }
     else {
+      max_depth = 0;
       lower = bad_min_score;
       upper = bad_max_score;
     }

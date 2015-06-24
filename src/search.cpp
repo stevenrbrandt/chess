@@ -209,8 +209,7 @@ int think(node_t& board,bool parallel)
     DECL_SCORE(alpha,-10000,board.hash);
     DECL_SCORE(beta,10000,board.hash);
     bool brk = false;  /* Indicates whether we broke away from iterative deepening 
-                          and need to call search on the actual ply */
-
+                          and need to call search on the actual ply */ 
     int low = 2;
     if(depth[board.side] % 2 == 1)
         low = 1;
@@ -224,7 +223,7 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       //bool stop = info-> stop; 
       f = search_ab(info);
-
+      
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
