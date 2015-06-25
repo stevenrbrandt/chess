@@ -94,15 +94,21 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int sum_depth =0;
-    if (board.side==LIGHT )
+    if (board.side==LIGHT ){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,sum_depth);
-    if (sum_depth>proc_info->excess){
-      proc_info->excess = sum_depth;
-    }
+      if (sum_depth>proc_info->excess){
+        proc_info->excess = sum_depth;
+    }}
       
-    if (entry_found)
+    if (entry_found){
+      if(alpha >= zhi)
+        return zhi;
+      else
         return zlo;
-    
+      alpha = max(zlo,alpha);
+      beta = min(zhi,beta);
+    }
+
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
     if (entry_found) {
@@ -149,10 +155,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             boost::shared_ptr<search_info> child_info{new search_info(board)};
             bool parallel;
-            if (child_info->excess > proc_info->excess) {
-              db_move = g;
-              //max_move = child_info->mv;
-            }if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
+            if (!aborted && !proc_info->get_abort() && makemove(child_info->board, g)) {
             
                 parallel = j > 0 && !capture(board,g);
                 boost::shared_ptr<task> t = parallel_task(depth, &parallel);
@@ -196,11 +199,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             boost::shared_ptr<search_info> child_info = child_task->info;
             
             tasks.erase(tasks.begin()+n);
-            
-            if (sum_depth > child_info->excess){
-                child_info->excess = sum_depth;
-                proc_info->excess = child_info->excess;
-            }
+           
 
             if(!children_aborted && (aborted || child_info->get_abort())) {
                 for(unsigned int m = 0;m < tasks.size();m++) {
@@ -213,14 +212,18 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             //child_task->join();
             if(child_info->get_abort()) 
                 continue;
-            val = -child_info->result;
             
-            if (val > max_val || proc_info->excess >0 ) {
-                max_val = val;
-                if (proc_info->excess >0)
-                  max_move = db_move; 
-                else{ 
-                max_move = child_info->mv;} 
+            val = -child_info->result;
+            bool found = false; 
+            if (child_info->excess > proc_info->excess && entry_found){
+                proc_info->excess = child_info->excess;
+                found = true;
+            }
+            
+            if (val > max_val || found ) {
+                max_move = child_info->mv; 
+                if (val > max_val)
+                  max_val = val;
                 if (val > alpha)
                 {
                     alpha = val;
@@ -258,8 +261,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         assert(max_move != INVALID_MOVE);
         ScopedLock s(cmutex);
         move_to_make = max_move;
-        //deeper = false;
-        //proc_info->stop= false;
     }
 
     // fifty chess_move draw rule
@@ -293,5 +294,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       }
       set_transposition_value(board,lo,hi);
     }
-    return max_val;
+    if(proc_info->excess > 0)
+      return val;
+    else
+     return max_val;
 }

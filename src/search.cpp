@@ -196,6 +196,8 @@ int think(node_t& board,bool parallel)
     while(d < depth[board.side]) {
         d+=stepsize;
         board.depth = d;
+        // search for boards with a score of 1 higher
+        //score_t f_better = ADD_SCORE(f,1);
         f = mtdf(board,f,d);
         boost::shared_ptr<task> new_root{new serial_task};
         root = new_root;
@@ -223,16 +225,16 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       //bool stop = info-> stop; 
       f = search_ab(info);
-      
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
         break;
       }
+
       boost::shared_ptr<task> new_root{new serial_task};
       root = new_root;
     }
-
+    
     /*
     if (brk) {
       boost::shared_ptr<search_info> info{new search_info};
