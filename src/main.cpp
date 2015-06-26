@@ -756,22 +756,22 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
   if (i == workq.size()) {
     if (in_check(board, board.side)) {
       if (board.side == LIGHT)
-        std::cout << "0-1 {Black mates}" << std::endl;
+        std::cout << "Result: 0-1 {Black mates}" << std::endl;
       else
-        std::cout << "1-0 {White mates}" << std::endl;
+        std::cout << "Result: 1-0 {White mates}" << std::endl;
     }
     else
-      std::cout << "1/2-1/2 {Stalemate}" << std::endl;
+      std::cout << "Result: 1/2-1/2 {Stalemate}" << std::endl;
     return 0;
   }
   else if (reps(board) == 3)
   {
-    std::cout << "1/2-1/2 {Draw by repetition}" << std::endl;
+    std::cout << "Result: 1/2-1/2 {Draw by repetition}" << std::endl;
     return 0;
   }
   else if (board.fifty >= 100)
   {
-    std::cout << "1/2-1/2 {Draw by fifty chess_move rule}" << std::endl;
+    std::cout << "Result: 1/2-1/2 {Draw by fifty chess_move rule}" << std::endl;
     return 0;
   }
   return 1;
