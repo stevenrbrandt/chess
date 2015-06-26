@@ -96,6 +96,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     int sum_depth =0;
     if (board.side==LIGHT ){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,sum_depth);
+      assert(zlo <= zhi);
       if (sum_depth>proc_info->excess){
         proc_info->excess = sum_depth;
     }}
@@ -129,8 +130,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     }
 
     std::vector<chess_move> workq;
-    chess_move max_move;
-    max_move = INVALID_MOVE; 
+    std::vector<chess_move> max_move;
     chess_move db_move;
     
 
@@ -221,7 +221,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             }
             
             if (val > max_val || found ) {
-                max_move = child_info->mv; 
+                max_move.clear();
+                max_move.push_back(child_info->mv); 
                 if (val > max_val)
                   max_val = val;
                 if (val > alpha)
@@ -236,6 +237,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                         continue;
                     }
                 }
+            } else if(val == max_val && proc_info->excess == 0) {
+              max_move.push_back(child_info->mv);
             }
         }
         if(alpha >= beta) {
@@ -244,7 +247,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     
   }
     // no legal moves? then we're in checkmate or stalemate
-    if (max_move == INVALID_MOVE) {
+    if (max_move.size()==0) {
         if (in_check(board, board.side))
         {
             DECL_SCORE(s,-10000 + board.ply,board.hash);
@@ -258,9 +261,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     
 }
     if (board.ply == 0 || board.depth>0) {
-        assert(max_move != INVALID_MOVE);
+        assert(max_move.size() != 0);
         ScopedLock s(cmutex);
-        move_to_make = max_move;
+        move_to_make = max_move.at(rand() % max_move.size());
     }
 
     // fifty chess_move draw rule
@@ -285,7 +288,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       lo = zlo;
     } else {
       store = false;
+      lo = hi = 0;
     }
+    assert(lo <= hi);
 
     if(store) {
       if (board.side==LIGHT ) {
