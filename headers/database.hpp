@@ -111,7 +111,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO "<< (white ? "white" : "black") <<" (depth, board, hi, lo, hash, sumdepth) VALUES ("<<depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess+depth<<");";
+      o<< "INSERT OR REPLACE INTO "<< (white ? "white" : "black") <<" (depth, board, hi, lo, hash, sumdepth) VALUES ("<<excess+depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess+depth<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
@@ -191,7 +191,7 @@ class database {
     const char *sql;
     pseudo v_score;
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"SUMDEPTH\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY SUMDEPTH, DEPTH"<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"SUMDEPTH\""<< (white ? ">": "=") <<board.depth<<" AND \"LO\" > "<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
@@ -204,30 +204,29 @@ class database {
         return v_score;
     }
 
-  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& max_depth){
+  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth){
     bool gotten = false;
     int depth = board.depth;
     std::ostringstream current;
     print_board(board,current,true);
     std::string curr = current.str();
-    const char *select = "HI, LO, DEPTH, SUMDEPTH";
+    const char *select = "HI, LO, DEPTH";
     const char *b = "BOARD";
     std::ostringstream search;
     pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
-    if (v_score.size() == 4){
-      int sum_depth = atoi(v_score.at(3).c_str());
-      int return_depth = atoi(v_score.at(2).c_str());
+    if (v_score.size() == 3){
+      //int sum_depth = atoi(v_score.at(3).c_str());
+      excess_depth = atoi(v_score.at(2).c_str())-depth;
       //int excess= sum_depth-depth;
-      max_depth = sum_depth;
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
-       upper =  atoi(v_score.at(0).c_str());
+       upper =  atol(v_score.at(0).c_str());
        cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten= true;
        }
      }
     else {
-      max_depth = 0;
+      excess_depth = 0;
       lower = bad_min_score;
       upper = bad_max_score;
     }

@@ -17,6 +17,7 @@
 #include <atomic>
 
 database dbase;
+
 void search_ab_pt(boost::shared_ptr<search_info> info)
 {
     info->result = search_ab(info);
@@ -53,6 +54,8 @@ struct When {
     int any() { return 0; }
 #endif
 };
+
+bool db_on = true;
 
 score_t search_ab(boost::shared_ptr<search_info> proc_info)
 {
@@ -93,21 +96,27 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t zlo = bad_min_score,zhi = bad_max_score;
     bool white =board.side == LIGHT;
     bool entry_found = false;
-    int sum_depth =0;
-    if (board.side==LIGHT ){
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,sum_depth);
-      if (sum_depth>proc_info->excess){
-        proc_info->excess = sum_depth;
-    }}
-      
+    int excess =0;
+    if (board.side==LIGHT && db_on){
+      score_t n_zlo = ADD_SCORE(zlo,1);
+      entry_found = dbase.get_transposition_value (board, n_zlo, zhi, white,p_board,excess);
+      if (excess > proc_info->excess){
+        proc_info->excess = excess;
+      }
+      boost::shared_ptr<search_info> info{new search_info};
+      info->board = board;
+      info->alpha = n_zlo;
+      info->beta = n_zlo;
+      info->depth = board.depth + excess;
+      db_on = false;
+      score_t g = search_ab(info);
+      db_on = true;
+      assert ( g >= n_zlo); 
+      }
+
     if (entry_found){
-      if(alpha >= zhi)
-        return zhi;
-      else
         return zlo;
-      alpha = max(zlo,alpha);
-      beta = min(zhi,beta);
-    }
+      }
 
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
@@ -214,16 +223,18 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 continue;
             
             val = -child_info->result;
+
             bool found = false; 
             if (child_info->excess > proc_info->excess && entry_found){
+                max_move = child_info->mv;
                 proc_info->excess = child_info->excess;
                 found = true;
+                break;
             }
             
-            if (val > max_val || found ) {
+            if (val > max_val) {
                 max_move = child_info->mv; 
-                if (val > max_val)
-                  max_val = val;
+                max_val = val;
                 if (val > alpha)
                 {
                     alpha = val;
@@ -271,10 +282,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     
     bool store = true;
     score_t lo, hi;
-    if(proc_info->excess > 0) {
+    if(proc_info->excess) {
       lo = val;
       hi = max_score;
-      std::cout<<"Max depth: "<<proc_info->excess<<std::endl;
+      std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
     } else if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
