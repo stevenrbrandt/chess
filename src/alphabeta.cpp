@@ -226,7 +226,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             bool found = false; 
             if (child_info->excess > proc_info->excess && entry_found){
-                max_move = child_info->mv;
+                max_move.push_back(child_info->mv);
                 proc_info->excess = child_info->excess;
                 found = true;
                 break;
