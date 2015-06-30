@@ -30,6 +30,10 @@ struct base_node_t {
     //counts number of moves
     int move_num;
     score_t p_board;
+    bool follow_capt = false;
+    score_t follow_score;
+    int follow_depth;
+    int search_depth;
     int ply;
     int hply;
     //std::vector<hash_t> hist_dat;

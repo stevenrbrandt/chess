@@ -75,6 +75,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         return s;
     }
 
+
     /* if this isn't the root of the search tree (where we have
        to pick a chess_move and can't simply return 0) then check to
        see if the position is a repeat. if so, we can assume that
@@ -98,20 +99,21 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool entry_found = false;
     int excess =0;
     if (board.side==LIGHT && db_on){
-      score_t n_zlo = ADD_SCORE(zlo,1);
-      entry_found = dbase.get_transposition_value (board, n_zlo, zhi, white,p_board,excess);
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
+        if (!board.follow_capt)
+          board.follow_capt = true;
       }
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
-      info->alpha = n_zlo;
-      info->beta = n_zlo;
+      info->alpha = zlo;
+      info->beta = zlo;
       info->depth = board.depth + excess;
       db_on = false;
       score_t g = search_ab(info);
       db_on = true;
-      assert ( g >= n_zlo); 
+      assert ( g >= zlo); 
       }
 
       
@@ -229,6 +231,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 max_move.push_back(child_info->mv);
                 proc_info->excess = child_info->excess;
                 found = true;
+                if (!board.follow_capt)
+                  board.follow_capt = true;
                 break;
             }
             

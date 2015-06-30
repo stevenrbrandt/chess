@@ -45,7 +45,6 @@ int count_exec_times;
 pcounter task_counter;
 
 
-
 void chx_terminate() {
     for(int i=0;i<3;i++)
         std::cout << std::endl;

@@ -147,9 +147,20 @@ boost::shared_ptr<task> parallel_task(int depth, bool *parallel) {
 // think() calls a search function 
 int think(node_t& board,bool parallel)
 {
-  evaluator ev;
-  DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
-  board.p_board = curr;
+    evaluator ev;
+    DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
+    score_t score_plus = ADD_SCORE(curr,1);
+  if (!board.follow_capt){
+    board.p_board = score_plus;
+    if (board.side == LIGHT)
+      board.follow_depth = 2;
+    }
+  if (board.follow_capt && board.side == LIGHT){
+    board.follow_depth-=2;
+    if (board.follow_depth == 0)
+      board.follow_capt = false;
+   }
+
   boost::shared_ptr<task> root{new serial_task};
 #ifdef PV_ON
   pv.clear();
@@ -186,6 +197,7 @@ int think(node_t& board,bool parallel)
     int d = depth[board.side] % stepsize;
     if(d == 0)
         d = stepsize;
+    board.search_depth = depth[LIGHT];
     board.depth = d;
     boost::shared_ptr<search_info> info{new search_info};
     info->board = board;
@@ -193,6 +205,14 @@ int think(node_t& board,bool parallel)
     info->alpha = alpha;
     info->beta = beta;
     score_t f(search_ab(info));
+    int excess = info->excess;
+    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+        if (board.side == LIGHT){
+          board.follow_depth = board.depth + excess;
+          board.follow_capt = true;
+          std::cout<<"Follow"<<board.follow_depth<<std::endl;}
+        board.p_board = f;
+    }
     while(d < depth[board.side]) {
         d+=stepsize;
         board.depth = d;
@@ -307,7 +327,7 @@ score_t mtdf(const node_t& board,score_t f,int depth)
 
 
 
-/* reps() returns the number of times the current position
+/* reps() return the number of times the current position
    has been repeated. It compares the current value of hash
    to previous values. */
 
