@@ -29,7 +29,7 @@ class database {
 
     database(){
         const char *sql;
-        rc = sqlite3_open("test.db", &db);
+        rc = sqlite3_open("testx.db", &db);
 
         if( rc ){
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
@@ -192,7 +192,7 @@ class database {
     pseudo v_score;
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"SUMDEPTH\""<< (white ? ">=": "=") <<board.depth+delta<<" AND \"LO\" >= "<< s<< " ORDER BY DEPTH"<<";";
+    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"DEPTH\""<< (white ? ">": "=") <<board.depth+delta<<" AND \"LO\" >= "<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
         sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);

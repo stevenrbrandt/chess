@@ -150,12 +150,16 @@ int think(node_t& board,bool parallel)
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
     score_t score_plus = ADD_SCORE(curr,1);
-  if (!board.follow_capt){
+  if (search_method != MTDF){
+    board.p_board = score_plus;
+    board.follow_capt = false;
+    }
+  else if (!board.follow_capt){
     board.p_board = score_plus;
     if (board.side == LIGHT)
       board.follow_depth = 2;
     }
-  if (board.follow_capt && board.side == LIGHT){
+  else if (board.follow_capt && board.side == LIGHT){
     board.follow_depth-=2;
     if (board.follow_depth == 0)
       board.follow_capt = false;
