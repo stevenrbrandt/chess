@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) 2011 Steve Brandt and Philip LeBlanc
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -150,17 +150,11 @@ int think(node_t& board,bool parallel)
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
     score_t score_plus = ADD_SCORE(curr,1);
-  if (search_method != MTDF){
+  if (!board.follow_capt){
     board.p_board = score_plus;
-    board.follow_capt = false;
     }
-  else if (!board.follow_capt){
-    board.p_board = score_plus;
-    if (board.side == LIGHT)
-      board.follow_depth = 2;
-    }
-  else if (board.follow_capt && board.side == LIGHT){
-    board.follow_depth-=2;
+  else{
+    board.follow_depth-=1;
     if (board.follow_depth == 0)
       board.follow_capt = false;
    }
@@ -201,7 +195,7 @@ int think(node_t& board,bool parallel)
     int d = depth[board.side] % stepsize;
     if(d == 0)
         d = stepsize;
-    board.search_depth = depth[LIGHT];
+    board.search_depth = depth[board.side];
     board.depth = d;
     boost::shared_ptr<search_info> info{new search_info};
     info->board = board;
@@ -236,9 +230,11 @@ int think(node_t& board,bool parallel)
     DECL_SCORE(beta,10000,board.hash);
     bool brk = false;  /* Indicates whether we broke away from iterative deepening 
                           and need to call search on the actual ply */ 
+    board.search_depth = depth[board.side];
     int low = 2;
     if(depth[board.side] % 2 == 1)
         low = 1;
+    int excess = 0;
     for (int i = low; i <= depth[board.side]; i++) // Iterative deepening
     {
       board.depth = i;
@@ -249,6 +245,8 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       //bool stop = info-> stop; 
       f = search_ab(info);
+      if (info->excess>excess)
+        excess = info->excess;      
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
@@ -257,6 +255,18 @@ int think(node_t& board,bool parallel)
 
       boost::shared_ptr<task> new_root{new serial_task};
       root = new_root;
+    }
+    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+      if (board.side == LIGHT){
+        board.p_board = f;
+        board.follow_capt = true;
+        board.follow_depth = board.depth + excess;
+      }
+      else{
+        board.follow_capt = false;
+        board.follow_depth = 2;
+      }
+      std::cout<<"Follow"<<board.follow_depth<<std::endl;
     }
     
     /*

@@ -121,6 +121,7 @@ int chx_main()
             int start = get_ms();
             think(board,false);
             int end = get_ms();
+           // if (move_to_make == INVALID_MOVE) {
             if (move_to_make.get32BitMove() == 0) {
                 std::cout << "(no legal moves)" << std::endl;
                 auto_move = 0;

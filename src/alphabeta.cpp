@@ -145,7 +145,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
     std::vector<chess_move> workq;
     std::vector<chess_move> max_move;
-    chess_move db_move;
     
 
     gen(workq, board); // Generate the moves
@@ -231,6 +230,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             bool found = false; 
             if (child_info->excess > proc_info->excess && entry_found){
+                max_move.clear();
                 max_move.push_back(child_info->mv);
                 proc_info->excess = child_info->excess;
                 found = true;

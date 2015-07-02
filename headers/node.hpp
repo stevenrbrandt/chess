@@ -32,7 +32,7 @@ struct base_node_t {
     score_t p_board;
     bool follow_capt = false;
     score_t follow_score;
-    int follow_depth=0;
+    int follow_depth=2;
     int search_depth=0;
     int ply;
     int hply;
