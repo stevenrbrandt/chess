@@ -102,9 +102,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
-        if (!board.follow_capt && search_method == MTDF)
-          board.follow_capt = true;
+        //if (!board.follow_capt && search_method == MTDF)
+        board.follow_capt = true;
       }
+      else
+        board.follow_depth = 0;
+
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
@@ -231,7 +234,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 max_move.push_back(child_info->mv);
                 proc_info->excess = child_info->excess;
                 found = true;
-                if (!board.follow_capt && search_method==MTDF){
+                if (!board.follow_capt){
                   board.follow_capt = true;
                   }
                 break;
