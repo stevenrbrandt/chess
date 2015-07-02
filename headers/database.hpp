@@ -220,7 +220,7 @@ class database {
       if (score_board(board) < atoi(v_score.at(1).c_str())){
        lower =  atol(v_score.at(1).c_str());
        upper =  atol(v_score.at(0).c_str());
-       cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
+       //cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
      }

@@ -404,7 +404,7 @@ void set_transposition_value(const node_t& board,score_t lower,score_t upper) {
     int n = iabs(board.hash^board.depth) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
-    if(board.depth >= z->depth) {
+    if(board.depth == 1 || board.depth >= z->depth) {
         z->board = board;
         z->lower = lower;
         z->upper = upper;
