@@ -205,12 +205,18 @@ int think(node_t& board,bool parallel)
     score_t f(search_ab(info));
     int excess = info->excess;
     if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
-        if (board.side == LIGHT){
-          board.follow_depth = board.depth + excess;
-          board.follow_capt = true;
-          std::cout<<"Follow"<<board.follow_depth<<std::endl;}
+      if (board.side == LIGHT){
         board.p_board = f;
+        board.follow_capt = true;
+        board.follow_depth = board.depth + excess;
+      }
+      else{
+        board.follow_capt = false;
+        board.follow_depth = 2;
+      }
+      std::cout<<"Follow"<<board.follow_depth<<std::endl;
     }
+    
     while(d < depth[board.side]) {
         d+=stepsize;
         board.depth = d;
