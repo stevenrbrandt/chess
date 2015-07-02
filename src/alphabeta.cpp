@@ -98,7 +98,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int excess =0;
-    if (board.side==LIGHT && db_on){
+    if (board.side==LIGHT && db_on && board.ply > 0){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
@@ -174,7 +174,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 boost::shared_ptr<task> t = parallel_task(depth, &parallel);
 
                 t->info = child_info;
-                t->info->board.depth = child_info->depth = depth-1;
+                int d = depth - 1;
+                if(d == 0 && capture(board,g))
+                  d = 1;
+                t->info->board.depth = child_info->depth = d;
                 assert(depth >= 0);
                 t->info->alpha = -beta;
                 t->info->beta = -alpha;
