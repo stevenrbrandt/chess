@@ -324,8 +324,8 @@ score_t mtdf(const node_t& board,score_t f,int depth)
             g = search_ab(info);
             break;
         } else {
-            alpha = max(g == lower ? lower+1 : lower,ADD_SCORE(g,    -(1+width/2)));
-            beta  = min(g == upper ? upper-1 : upper,ADD_SCORE(alpha, (1+width)));
+            alpha = max(g == lower ? ADD_SCORE(lower,1) : lower, ADD_SCORE(g,    -(1+width/2)));
+            beta  = min(g == upper ? ADD_SCORE(upper,-1) : upper, ADD_SCORE(alpha, (1+width)));
         }
         boost::shared_ptr<search_info> info{new search_info};
         info->board = board;
