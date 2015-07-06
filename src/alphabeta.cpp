@@ -316,7 +316,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     assert(lo <= hi);
 
     if(store) {
-      if (board.side==LIGHT ) {
+      if (board.side==LIGHT && board.follow_capt) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }
