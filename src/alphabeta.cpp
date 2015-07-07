@@ -98,16 +98,16 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int excess =0;
-    if (board.side==LIGHT && db_on && board.ply > 0){
+    if (board.root_side && db_on && board.ply > 0){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
         //if (!board.follow_capt && search_method == MTDF)
         board.follow_capt = true;
       }
-      else
+      else{
         board.follow_depth = 0;
-
+        }
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
@@ -316,7 +316,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     assert(lo <= hi);
 
     if(store) {
-      if (board.side==LIGHT && board.follow_capt) {
+      if (board.root_side) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }

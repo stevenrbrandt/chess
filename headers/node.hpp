@@ -31,8 +31,9 @@ struct base_node_t {
     int move_num;
     score_t p_board;
     bool follow_capt = false;
+    bool root_side;
     score_t follow_score;
-    int follow_depth=2;
+    int follow_depth;
     int search_depth=0;
     int ply;
     int hply;

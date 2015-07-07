@@ -150,6 +150,7 @@ int think(node_t& board,bool parallel)
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
     score_t score_plus = ADD_SCORE(curr,1);
+    board.root_side = board.side == LIGHT;
   if (!board.follow_capt){
     board.p_board = score_plus;
     }
@@ -208,13 +209,15 @@ int think(node_t& board,bool parallel)
       if (board.side == LIGHT){
         board.p_board = f;
         board.follow_capt = true;
-        board.follow_depth = board.depth + excess;
+        board.follow_depth = 2+board.depth + excess;
       }
-      else{
+      if (board.side == DARK && board.follow_capt){
         board.follow_capt = false;
         board.follow_depth = 2;
       }
-      std::cout<<"Follow"<<board.follow_depth<<std::endl;
+      else{
+      }
+    std::cout<<"Follow"<<board.follow_depth<<std::endl;
     }
     
     while(d < depth[board.side]) {
