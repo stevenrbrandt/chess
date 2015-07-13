@@ -143,8 +143,18 @@ int chx_main()
             gen(workq, board); /* Populate the work queue with the moves for
                                   the next board position */
 
-            if (output)
+            if (output) {
                 print_board(board, std::cout);
+                evaluator ev;
+                int score = ev.eval_simple(board);
+                if(board.side==DARK) {
+                  score = -score;
+                  std::cout << "WHITE MOVED: ";
+                } else {
+                  std::cout << "BLACK MOVED: ";
+                }
+                std::cout << "SCORE: " << score << std::endl;
+            }
             if (auto_move)
                 auto_move = print_result(workq, board);
             else
