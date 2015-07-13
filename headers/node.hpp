@@ -33,8 +33,8 @@ struct base_node_t {
     bool follow_capt = false;
     bool root_side;
     score_t follow_score;
-    int follow_depth;
-    int search_depth=0;
+    int follow_depth = 2;
+    int search_depth = 0;
     int ply;
     int hply;
     //std::vector<hash_t> hist_dat;

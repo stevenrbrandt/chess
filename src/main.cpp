@@ -19,6 +19,7 @@
 #include "parallel_support.hpp"
 #include <boost/algorithm/string.hpp>
 #include "database.hpp"
+#include "combine.hpp"
 #include "main.hpp"
 #include "pgn.hpp"
 #include <signal.h>
@@ -217,6 +218,23 @@ int chx_main()
             cout << "PGN output " << (pgn_enabled?"enabled.":"disabled.") << std::endl;
             continue;
         }
+
+        if (input[0] == "merge"){
+          try{
+            void merge(std::vector<std::string, std::allocator<std::string>> stuff);
+            std::vector<std::string> databases;
+            databases = input;
+            databases.erase(databases.begin());
+            int size = databases.size();
+
+            merge(databases);
+            }
+            catch(out_of_range&){
+            std::cerr<< "Invalid databases given." << std::endl;
+          }
+          continue;
+          }
+
         if (input[0] == "new") {
             computer_side = EMPTY;
             init_board(board);

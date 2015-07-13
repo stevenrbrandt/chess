@@ -205,7 +205,7 @@ int think(node_t& board,bool parallel)
     info->beta = beta;
     score_t f(search_ab(info));
     int excess = info->excess;
-    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+    if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
       if (board.side == LIGHT){
         board.p_board = f;
         board.follow_capt = true;
@@ -254,8 +254,11 @@ int think(node_t& board,bool parallel)
       info->beta = beta;
       //bool stop = info-> stop; 
       f = search_ab(info);
-      if (info->excess>excess)
-        excess = info->excess;      
+      if (info->excess > excess){
+        excess = info->excess;
+        board.follow_depth = true;
+        std::cout<<"Excess: "<<excess<<std::endl;
+      }
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
@@ -265,17 +268,19 @@ int think(node_t& board,bool parallel)
       boost::shared_ptr<task> new_root{new serial_task};
       root = new_root;
     }
-    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+    if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+      if (score_plus>=board.p_board)
+        std::cout<<"Greater score"<<std::endl;
       if (board.side == LIGHT){
         board.p_board = f;
         board.follow_capt = true;
-        board.follow_depth = board.depth + excess;
+        board.follow_depth = 2+board.depth + excess;
       }
-      else{
+      if (board.side == DARK && board.follow_capt){
         board.follow_capt = false;
         board.follow_depth = 2;
       }
-      std::cout<<"Follow"<<board.follow_depth<<std::endl;
+      std::cout<<"Follow "<<board.follow_depth<<"Follow capt "<<board.follow_capt<<std::endl;
     }
     
     /*

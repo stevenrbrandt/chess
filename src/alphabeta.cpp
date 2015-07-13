@@ -106,7 +106,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         board.follow_capt = true;
       }
       else{
-        board.follow_depth = 0;
+        //board.follow_depth = 0;
         }
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
@@ -232,7 +232,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             val = -child_info->result;
 
             bool found = false; 
-            if (child_info->excess > proc_info->excess && entry_found){
+            if (child_info->excess > proc_info->excess){
                 max_move.clear();
                 max_move.push_back(child_info->mv);
                 proc_info->excess = child_info->excess;

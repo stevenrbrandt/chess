@@ -29,7 +29,7 @@ class database {
 
     database(){
         const char *sql;
-        rc = sqlite3_open("testx.db", &db);
+        rc = sqlite3_open("test1.db", &db);
 
         if( rc ){
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
@@ -48,7 +48,7 @@ class database {
         "SUMDEPTH         INTEGER     NOT NULL,"\
         "PRIMARY KEY (DEPTH, BOARD));";
        //Execute SQL statement
-        cout << "SQL: "<< sql << endl;
+        //cout << "SQL: "<< sql << endl;
         rc = sqlite3_exec(db, sql, 0, 0, &zErrMsg);
         if( rc != SQLITE_OK ){
             fprintf(stderr, "%s\n", zErrMsg);
