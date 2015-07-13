@@ -256,7 +256,7 @@ int think(node_t& board,bool parallel)
       f = search_ab(info);
       if (info->excess > excess){
         excess = info->excess;
-        board.follow_depth = true;
+        board.follow_capt = true;
         std::cout<<"Excess: "<<excess<<std::endl;
       }
       if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
