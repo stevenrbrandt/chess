@@ -377,24 +377,23 @@ int reps(const node_t& board)
   return r;
 }
 
+bool pv_less(const chess_move& m1,const chess_move& m2) {
+  int pri1 = 0;
+  int pri2 = 0;
+  for(int i=0;i<pv.size();++i) {
+    if(m1 == pv[i].mv) pri1 = i+2;
+    if(m2 == pv[i].mv) pri2 = i+2;
+  }
+  if(m1.getCapture())
+    pri1++;
+  if(m2.getCapture())
+    pri2++;
+  return pri2 < pri1;
+}
+
 void sort_pv(std::vector<chess_move>& workq, int index)
 {
-  if((size_t)index < pv.size())
-    return;
-  chess_move temp = pv[index].get();
-  if(temp == INVALID_MOVE)
-    return;
-  for(size_t i = 0; i < workq.size() ; i++)
-  {
-    if (workq[i] == temp) /* If we have a chess_move in the work queue that is the 
-                                    same as the best chess_move we have searched before */
-    {
-      temp = workq[0];
-      workq[0] = workq[i];
-      workq[i] = temp;
-      break;
-    }
-  }
+  std::sort(workq.begin(),workq.end(),pv_less);
 }
 
 #define TRANSPOSE_ON 1

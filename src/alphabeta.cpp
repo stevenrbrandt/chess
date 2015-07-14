@@ -98,7 +98,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int excess =0;
-    if (board.root_side && db_on && board.ply > 0){
+    if (board.root_side && db_on && board.ply > 0 && !proc_info->quiescent){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
@@ -150,7 +150,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     gen(workq, board); // Generate the moves
 
 #ifdef PV_ON
-    sort_pv(workq, board.ply); // Part of iterative deepening
+    sort_pv(workq, board.search_depth-1); // Part of iterative deepening
 #endif
 
     const int worksq = workq.size();
@@ -175,8 +175,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
                 t->info = child_info;
                 int d = depth - 1;
-                if(d == 0 && capture(board,g))
+                if(d == 0 && capture(board,g)) {
                   d = 1;
+                  t->info->quiescent = true;
+                } else if(proc_info->quiescent) {
+                  t->info->quiescent = true;
+                }
                 t->info->board.depth = child_info->depth = d;
                 assert(depth >= 0);
                 t->info->alpha = -beta;
@@ -250,7 +254,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                     alpha = val;
 #ifdef PV_ON
                     if(!child_info->get_abort())
-                        pv[board.ply].set(child_info->mv);
+                        pv[board.search_depth - 1].set(child_info->mv);
 #endif
                     if(alpha >= beta) {
                         aborted = true;
@@ -301,11 +305,15 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     } else if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
+      if(lo == zlo)
+        store = false;
     } else if(alpha < max_val && max_val < beta) {
       lo = hi = max_val;
     } else if(max_val >= beta) {
       hi = max_val;
       lo = zlo;
+      if(hi == zhi)
+        store = false;
     } else {
       store = false;
       lo = hi = 0;

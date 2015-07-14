@@ -46,11 +46,12 @@ public:
     score_t beta;
     score_t printed_board;
     int excess;
+    bool quiescent;
     search_info(const node_t& board_) : abort_flag_(false), abort_flag(&abort_flag_), board(board_),
-            result(bad_min_score),excess(0) {
+            result(bad_min_score),excess(0),quiescent(false) {
     }
 
-    search_info() : abort_flag_(false), abort_flag(&abort_flag_),excess(0) {
+    search_info() : abort_flag_(false), abort_flag(&abort_flag_),excess(0),quiescent(false) {
     }
 
     ~search_info() {

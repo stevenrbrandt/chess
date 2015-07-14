@@ -76,15 +76,15 @@ public:
         bits = mv.bits;
         score = mv.score;
     }
-    bool operator==(const chess_move& mv)
+    bool operator==(const chess_move& mv) const
     {
         return (mv.u == u);
     }
-    bool operator==(const uint32_t mv)
+    bool operator==(const uint32_t mv) const
     {
         return (mv == u);
     }
-    bool operator!=(const uint32_t mv)
+    bool operator!=(const uint32_t mv) const
     {
         return (mv != u);
     }

@@ -124,7 +124,8 @@ class database {
         //fprintf(stdout, "Records created sucessfully\n");
       }
       if (board.depth>3){
-        cout<<"Adding depth of "<<board.depth<<endl;}
+        ;//cout<<"Adding depth of "<<board.depth<<endl;
+      }
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
 /*    int get_data(){
