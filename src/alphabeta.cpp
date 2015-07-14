@@ -183,10 +183,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 t->info->beta = -alpha;
                 t->info->result = -beta;
                 t->info->mv = g;
-                if(depth == 1 && capture(board,g))
-                    t->pfunc = qeval_f;
-                else
-                    t->pfunc = search_ab_f;
+                t->pfunc = search_ab_f;
                 t->start();
                 tasks.push_back(t);
 
@@ -300,7 +297,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     if(proc_info->excess) {
       lo = val;
       hi = max_score;
-      std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
+      //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
     } else if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
@@ -316,7 +313,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     assert(lo <= hi);
 
     if(store) {
-      if (board.root_side) {
+      if (board.root_side == LIGHT && board.depth > 1) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }

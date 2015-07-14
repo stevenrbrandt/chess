@@ -205,11 +205,11 @@ int think(node_t& board,bool parallel)
     info->beta = beta;
     score_t f(search_ab(info));
     int excess = info->excess;
-    if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
       if (board.side == LIGHT){
         board.p_board = f;
         board.follow_capt = true;
-        board.follow_depth = 2+board.depth + excess;
+        board.follow_depth = board.depth + excess;
       }
       if (board.side == DARK && board.follow_capt){
         board.follow_capt = false;
@@ -268,20 +268,23 @@ int think(node_t& board,bool parallel)
       boost::shared_ptr<task> new_root{new serial_task};
       root = new_root;
     }
-    if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+    if(board.follow_capt && board.follow_depth <= board.search_depth) {
+      board.follow_capt = false;
+    }
+    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt) {// || score_plus>=board.p_board){
       if (score_plus>=board.p_board)
         std::cout<<"Greater score"<<std::endl;
       if (board.side == LIGHT){
         board.p_board = f;
         board.follow_capt = true;
-        board.follow_depth = 2+board.depth + excess;
+        board.follow_depth = board.depth + excess;
       }
       if (board.side == DARK && board.follow_capt){
         board.follow_capt = false;
         board.follow_depth = 2;
       }
-      std::cout<<"Follow "<<board.follow_depth<<"Follow capt "<<board.follow_capt<<std::endl;
     }
+    std::cout<<"Follow "<<board.follow_depth<<" Follow capt "<<board.follow_capt<< " Follow score: " << board.p_board << std::endl;
     
     /*
     if (brk) {

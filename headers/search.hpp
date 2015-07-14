@@ -60,6 +60,6 @@ private:
 extern std::vector<safe_move> pv;  // Principle Variation, used in iterative deepening
 
 
-#define PV_ON 1
+//#define PV_ON 1
 
 #endif
