@@ -55,7 +55,33 @@ struct When {
 #endif
 };
 
-bool db_on = true;
+bool db_on = false;//true;
+
+bool check_score(const node_t& board,int depth,score_t score,bool verbose) {
+  boost::shared_ptr<search_info> info{new search_info};
+  info->board = board;
+  info->alpha = score;
+  info->beta = score;
+  if(depth < 4) {
+    info->alpha = bad_min_score;
+    info->beta = bad_max_score;
+  }
+  if(board.side == DARK) {
+    score_t a = info->alpha;
+    score_t b = info->beta;
+    info->alpha = -b;
+    info->beta = -a;
+    score = -score;
+  }
+  info->depth = depth;
+  db_on = false;
+  score_t g = search_ab(info);
+  if(verbose)
+    std::cout << "score=" << score << " g=" << g << std::endl;
+  db_on = true;
+  assert(g <= max_score);
+  return (g >= score);
+}
 
 score_t search_ab(boost::shared_ptr<search_info> proc_info)
 {
@@ -108,6 +134,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       else{
         //board.follow_depth = 0;
         }
+      /*
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
@@ -117,6 +144,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       score_t g = search_ab(info);
       db_on = true;
       assert ( g >= zlo); 
+      */
+      //assert(check_score(board,board.depth+excess,zlo,false));
       }
 
       
@@ -176,7 +205,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 t->info = child_info;
                 int d = depth - 1;
                 if(d == 0 && capture(board,g))
-                  d = 1;
+                  ;//d = 1;
                 t->info->board.depth = child_info->depth = d;
                 assert(depth >= 0);
                 t->info->alpha = -beta;

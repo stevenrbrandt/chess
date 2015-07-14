@@ -144,6 +144,9 @@ boost::shared_ptr<task> parallel_task(int depth, bool *parallel) {
     return t;
 }
 
+bool locked = false;
+bool check_score(const node_t& board,int depth,score_t score,bool verbose);
+
 // think() calls a search function 
 int think(node_t& board,bool parallel)
 {
@@ -246,6 +249,7 @@ int think(node_t& board,bool parallel)
     int excess = 0;
     for (int i = low; i <= depth[board.side]; i++) // Iterative deepening
     {
+      std::cout << "iter(" << i << ")" << std::endl;
       board.depth = i;
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
@@ -259,7 +263,12 @@ int think(node_t& board,bool parallel)
         board.follow_capt = true;
         std::cout<<"Excess: "<<excess<<std::endl;
       }
-      if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
+      if (board.follow_capt && i >= board.follow_depth)
+      {
+        brk = true;
+        break;
+      }
+      if (i >= depth[board.side])  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
         break;
@@ -268,19 +277,26 @@ int think(node_t& board,bool parallel)
       boost::shared_ptr<task> new_root{new serial_task};
       root = new_root;
     }
-    if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
-      if (score_plus>=board.p_board)
-        std::cout<<"Greater score"<<std::endl;
-      if (board.side == LIGHT){
-        board.p_board = f;
-        board.follow_capt = true;
-        board.follow_depth = 2+board.depth + excess;
+    if(!locked) {
+      if ((f > board.p_board && (excess+board.depth+2)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
+        if (score_plus>=board.p_board)
+          std::cout<<"Greater score"<<std::endl;
+        if (board.side == LIGHT){
+          board.p_board = f;
+          board.follow_capt = true;
+          board.follow_depth = board.depth + excess;
+          locked = true;
+        }
+        if (board.side == DARK && board.follow_capt){
+          board.follow_capt = false;
+          board.follow_depth = 2;
+        }
       }
-      if (board.side == DARK && board.follow_capt){
-        board.follow_capt = false;
-        board.follow_depth = 2;
-      }
-      std::cout<<"Follow "<<board.follow_depth<<"Follow capt "<<board.follow_capt<<std::endl;
+    }
+    std::cout<<"Follow "<<board.follow_depth<<" Follow capt "<<board.follow_capt<<" score=" << board.p_board << std::endl;
+    if(board.follow_capt) {
+      assert(check_score(board,board.follow_depth,board.p_board,true));
+      std::cout << "CHECKED" << std::endl;
     }
     
     /*
