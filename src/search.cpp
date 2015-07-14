@@ -411,7 +411,7 @@ zkey_t transposition_table[table_size];
 bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) {
     bool gotten = false;
 #ifdef TRANSPOSE_ON
-    int n = iabs(board.hash^board.depth) % table_size;
+    int n = iabs((board.hash << 4) ^ board.depth) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(z->depth >= 0 && board_equals(board,z->board)) {
@@ -428,7 +428,7 @@ bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) 
 
 void set_transposition_value(const node_t& board,score_t lower,score_t upper) {
 #ifdef TRANSPOSE_ON
-    int n = iabs(board.hash^board.depth) % table_size;
+    int n = iabs((board.hash << 4) ^ board.depth) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(board.depth == 1 || board.depth >= z->depth) {
