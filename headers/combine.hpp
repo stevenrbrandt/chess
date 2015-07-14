@@ -36,8 +36,7 @@ static int callback(void *NotUsed, int argc, char **argvalue, char **azColName){
   std::ostringstream ins;
   ins<<"INSERT OR REPLACE INTO white (depth, board, hi, lo, hash, sumdepth) VALUES (\'"<<argvalue[0]<<"\',\'"<<argvalue[1]<<"\',\'"<<argvalue[2]<<"\',\'"<<argvalue[3]<<"\',\'"<<argvalue[4]<<"\',\'"<<argvalue[5]<<"\');"; 
   std::string insert = ins.str();
-
-  if (params.size() < 0){
+  if (params.size() == 0){
     sql = insert.c_str();
     rc = sqlite3_exec(db, sql, 0,0, &zErrMsg);
     if (rc != SQLITE_OK){
@@ -48,6 +47,8 @@ static int callback(void *NotUsed, int argc, char **argvalue, char **azColName){
   }
 
   if (params.size() == 6){
+    if (argvalue[3]== NULL)
+      assert(false);
     score_t zlo = max(atoi(argvalue[3]), atol(params.at(3).c_str()));
     score_t zhi = min(atoi(argvalue[2]), atol(params.at(2).c_str())); 
     std::ostringstream o;
@@ -109,7 +110,7 @@ void merge(std::vector<std::string> databases)
       fprintf(stderr, "SQL error 1st select: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
     }else{
-      fprintf(stderr, "Merged successfuly");  
+      fprintf(stderr, "Merged successfuly\n");  
       } 
    }
   // sqlite3_close(db);
