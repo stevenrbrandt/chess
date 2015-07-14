@@ -380,7 +380,7 @@ int reps(const node_t& board)
 bool pv_less(const chess_move& m1,const chess_move& m2) {
   int pri1 = 0;
   int pri2 = 0;
-  for(int i=0;i<pv.size();++i) {
+  for(int i=max(pv.size()-2,0);i<pv.size();++i) {
     if(m1 == pv[i].mv) pri1 = i+2;
     if(m2 == pv[i].mv) pri2 = i+2;
   }
