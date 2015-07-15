@@ -321,11 +321,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     assert(lo <= hi);
 
     if(store) {
-      if (board.root_side == LIGHT && board.depth > 1) {
+      if (board.root_side == LIGHT && (board.depth > 1 && proc_info->excess==0)) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }
-      set_transposition_value(board,lo,hi);
+    set_transposition_value(board,lo,hi);
     }
     if(proc_info->excess > 0)
       return val;
