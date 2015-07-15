@@ -98,7 +98,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int excess =0;
-    if (board.root_side && db_on && board.ply > 0 && !proc_info->quiescent){
+    if (board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
@@ -321,7 +321,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     assert(lo <= hi);
 
     if(store) {
-      if (board.root_side == LIGHT && (board.depth > 1 && proc_info->excess==0)) {
+      if (board.root_side == LIGHT && board.depth + proc_info->excess > 1) {
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }

@@ -150,7 +150,7 @@ int think(node_t& board,bool parallel)
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
     score_t score_plus = ADD_SCORE(curr,1);
-    board.root_side = board.side == LIGHT;
+    board.root_side = board.side;// == LIGHT;
   if (!board.follow_capt){
     board.p_board = score_plus;
     }
@@ -257,9 +257,10 @@ int think(node_t& board,bool parallel)
       info->excess = excess;
       //bool stop = info-> stop; 
       f = search_ab(info);
-      if (info->excess >= excess){
+      if (info->excess > 0) {
         excess = info->excess;
         board.follow_capt = true;
+        std::cout << "Excess: " << excess << std::endl;
       }
       if (i > depth[board.side])  // if our ply is greater than the iter_depth, then break
       {
