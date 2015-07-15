@@ -7,7 +7,9 @@
 #include "data.hpp"
 #include "defs.hpp"
 #include "chess_move.hpp"
+#ifdef SQLITE3_SUPPORT
 #include "sqlite3.h"
+#endif
 #include "main.hpp"
 #include "search.hpp"
 #include <assert.h>
@@ -22,12 +24,15 @@ using pseudo = std::vector<std::string>;
 
 class database {
   public:
+     #ifdef SQLITE3_SUPPORT
     sqlite3 *db;
+    #endif
     char *zErrMsg=0;
     int rc;
     struct args;
 
     database(){
+    #ifdef SQLITE3_SUPPORT
         const char *sql;
         rc = sqlite3_open("test1.db", &db);
 
@@ -72,13 +77,16 @@ class database {
             fprintf(stdout, "Table created successfully\n");
         }
 //    deleteAll();
+    #endif
     };
 
 //destructor
     ~database(){
+     #ifdef SQLITE3_SUPPORT
      // get_data();
       sqlite3_close(db);
       cout<<"database closed. \n";
+     #endif
     }
 
  score_t score_board (const node_t& board) {
@@ -99,6 +107,7 @@ class database {
   }
 */
     void add_data(const node_t& board, score_t lo, score_t hi, bool white, int excess){
+     #ifdef SQLITE3_SUPPORT
       //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int depth = board.depth;
       auto hash= board.hash;
@@ -126,6 +135,7 @@ class database {
       if (board.depth>3){
         ;//cout<<"Adding depth of "<<board.depth<<endl;
       }
+     #endif
     }
 //look for boards that are the same, look for boards >= to current depth, most importantly score greater than the current score
 /*    int get_data(){
@@ -188,8 +198,9 @@ class database {
     }
 
     pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s){
-    const char *sql;
     pseudo v_score;
+    #ifdef SQLITE3_SUPPORT
+    const char *sql;
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
     out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"DEPTH\""<< (white ? ">=": "=") <<board.depth+delta<<" AND \"LO\" >= "<< s<< " ORDER BY DEPTH"<<";";
@@ -199,13 +210,14 @@ class database {
     if (rc!= SQLITE_OK){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
-    }else{
       }
       //fprintf(stdout, "Looked through board successfully\n");
-        return v_score;
+    #endif
+    return v_score;
     }
 
   bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth){
+    #ifdef SQLITE3_SUPPORT
     bool gotten = false;
     std::ostringstream current;
     print_board(board,current,true);
@@ -232,6 +244,9 @@ class database {
     }
     //deeper= false;
     return gotten;
+    #else
+    return false;
+    #endif
   }
 
     //callback used for select operation

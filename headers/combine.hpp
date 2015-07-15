@@ -3,14 +3,18 @@
 #include <iostream>
 
 #include <string>
+#ifdef SQLITE3_SUPPORT
 #include "sqlite3.h"
+#endif
 #include "score.hpp"
 #include <vector>
 
 using namespace std;
 using compare = std::vector<std::string>;
+#ifdef SQLITE3_SUPPORT
 sqlite3 *db;
 sqlite3 *db2;
+#endif
 
 char *zErrMsg=0;
 int rc;
@@ -19,6 +23,7 @@ const char *sql;
 
 static int callback2(void *Used, int argc, char **argvalue, char **azColName);
 static int callback(void *NotUsed, int argc, char **argvalue, char **azColName){
+#ifdef SQLITE3_SUPPORT
   //get values from destination database if they exist
   std::ostringstream select2;
   select2<<"SELECT * FROM white WHERE DEPTH=\'"<<argvalue[0]<<"\' AND BOARD=\'"<<argvalue[1]<<"\';";
@@ -61,6 +66,7 @@ static int callback(void *NotUsed, int argc, char **argvalue, char **azColName){
       sqlite3_free(zErrMsg);
     }
   }
+#endif
   return 0;
 }
 
@@ -76,6 +82,7 @@ static int callback(void *NotUsed, int argc, char **argvalue, char **azColName);
 
 void merge(std::vector<std::string> databases)
 {
+#ifdef SQLITE3_SUPPORT
   sqlite3_close(db);
   std::string current_database = databases.at(0).c_str();
   std::ostringstream l;
@@ -116,6 +123,7 @@ void merge(std::vector<std::string> databases)
   // sqlite3_close(db);
    //sqlite3_close(db2);
     
+#endif
 }
 
 #endif

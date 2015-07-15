@@ -377,23 +377,51 @@ int reps(const node_t& board)
   return r;
 }
 
-bool pv_less(const chess_move& m1,const chess_move& m2) {
-  int pri1 = 0;
-  int pri2 = 0;
-  for(int i=max(pv.size()-2,0);i<pv.size();++i) {
-    if(m1 == pv[i].mv) pri1 = i+2;
-    if(m2 == pv[i].mv) pri2 = i+2;
-  }
-  if(m1.getCapture())
-    pri1++;
-  if(m2.getCapture())
-    pri2++;
-  return pri2 < pri1;
+
+template<typename T>
+void mqswap(std::vector<T>& vec,int i1,int i2) {
+  if(i1 == i2) return;
+  T tmp = vec.at(i1);
+  vec.at(i1) = vec.at(i2);
+  vec.at(i2) = tmp;
 }
 
 void sort_pv(std::vector<chess_move>& workq, int index)
 {
-  std::sort(workq.begin(),workq.end(),pv_less);
+  int i1=0, i2=workq.size()-1;
+  chess_move mv1,mv2;
+  // put the last 2 pv searches first
+  if(pv.size()>0) {
+    mv1 = pv[pv.size()-1].mv;
+    for(int i=0;i<workq.size();i++) {
+      if(mv1 == workq[i]) {
+        mqswap(workq,i,i1);
+        i1++;
+        break;
+      }
+    }
+  }
+  if(pv.size()>1) {
+    mv2 = pv[pv.size()-1].mv;
+    if(mv2 != mv1) {
+      for(int i=i1;i<workq.size();i++) {
+        if(mv2 == workq[i]) {
+          mqswap(workq,i,i1);
+          i1++;
+          break;
+        }
+      }
+    }
+  }
+  // put captures last
+  while(i1 < i2) {
+    if(!workq[i1].getCapture())
+      i1++;
+    else if(workq[i2].getCapture())
+      i2--;
+    else
+      mqswap(workq,i1,i2);
+  }
 }
 
 #define TRANSPOSE_ON 1

@@ -80,6 +80,10 @@ public:
     {
         return (mv.u == u);
     }
+    bool operator!=(const chess_move& mv) const
+    {
+        return (mv.u != u);
+    }
     bool operator==(const uint32_t mv) const
     {
         return (mv == u);

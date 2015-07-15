@@ -130,8 +130,12 @@ int chx_main()
                 computer_side = EMPTY;
                 continue;
             }
+            double secs = 1e-3*(end-start);
+            sum_exec_times += secs;
+            count_exec_times += 1;
+            double avg_secs = sum_exec_times/count_exec_times;
             if (output)
-                std::cout << "Computer's chess_move: " << move_to_make.str() << " time=" << std::setprecision(3) << 1e-3*(end-start) << " sec"
+                std::cout << "Computer's chess_move: " << move_to_make.str() << " time=" << std::setprecision(3) << secs << " sec (avg = " << avg_secs << ")"
                     << std::endl;
             if (pgn_enabled)
                 pgn_output(board, move_to_make);
