@@ -28,7 +28,6 @@
 
 #include <unistd.h>
 
-
 #ifdef READLINE_SUPPORT
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -433,7 +432,7 @@ int chx_main()
         }
 
         int m;
-        m = parse_move(workq, s.c_str());
+        m = parse_move(workq, s.c_str(), board);
         chess_move mov;
         mov = m;
         node_t newboard = board;
@@ -702,10 +701,43 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
 /* parse the chess_move s (in coordinate notation) and return the chess_move's
    int value, or -1 if the chess_move is illegal */
 
-int parse_move(std::vector<chess_move>& workq, const char *s)
+int parse_move(std::vector<chess_move>& workq, const char *s, const node_t& board)
 {
   int from, to;
-
+  if (s[2]=='O'){
+      if (board.side == LIGHT) from= 60;
+      else from =4;
+      to = from +2;
+       if (s[3]=='O') to = from -4;
+      for(size_t i=0; i< workq.size();i++){
+        if (workq[i].getFrom() == from) {
+          to = workq[i].getTo();
+          if (piece_char[(size_t)board.piece[to]] == (char) 0 )
+           if (abs(to-from) == 2){
+              cout<<from<<"   "<<to<<endl;
+             return workq[i].get32BitMove();}
+       }
+     }
+   }
+   else if (s[0]==' '){
+     char pos;
+     if (s[4] ){
+       to = s[3] - 'a';
+       to+= 8 * (8-(s[4] - '0'));
+       pos = s[2];
+     }else{
+       to = s[2] - 'a';
+       to += 8 * (8 - (s[3] - '0'));}
+     for (size_t i = 0; i <workq.size(); i++){
+       if (workq[i].getTo()== to  ){
+         from =workq[i].getFrom();
+         if(piece_char[(size_t)board.piece[workq[i].getFrom()]] == 'P' && s[1]     == ' ' && (!s[4] || workq[i].str()[0] == pos))
+            return workq[i].get32BitMove();
+         if(piece_char[(size_t)board.piece[workq[i].getFrom()]] == s[1] && (!s    [4] || workq[i].str()[0] == pos))
+           return workq[i].get32BitMove();
+       }
+     }
+   }
   // make sure the string looks like a chess_move
   if (s[0] < 'a' || s[0] > 'h' ||
       s[1] < '0' || s[1] > '9' ||

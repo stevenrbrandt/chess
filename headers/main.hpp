@@ -17,7 +17,7 @@
 #include "chess_move.hpp"
 
 int main(int argc, char *argv[]);
-int parse_move(std::vector<chess_move>& workq, const char *s);
+int parse_move(std::vector<chess_move>& workq, const char *s, const node_t& board);
 char *move_str(chess_move& m);
 void print_board(const node_t& board, std::ostream& out,bool trimmed=false);
 int print_result(std::vector<chess_move>& workq, node_t& board);
