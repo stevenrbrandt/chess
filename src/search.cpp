@@ -246,6 +246,7 @@ int think(node_t& board,bool parallel)
     int excess = 0;
     for (int i = low; i <= depth[board.side]; i++) // Iterative deepening
     {
+      std::cout << "iter(" << i << ")" << std::endl;
       board.depth = i;
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
@@ -259,7 +260,7 @@ int think(node_t& board,bool parallel)
         board.follow_capt = true;
         std::cout<<"Excess: "<<excess<<std::endl;
       }
-      if (i >= iter_depth)  // if our ply is greater than the iter_depth, then break
+      if (i >= depth[board.side])  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
         break;

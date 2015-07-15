@@ -39,6 +39,7 @@ void init_board(node_t& board)
     board.hist_dat.resize(10);
     // init_hash() must be called before this function
     board.hash = set_hash(board);  
+    board.follow_capt = false;
 }
 
 bool board_equals(const node_t& b1,const node_t& b2) {
