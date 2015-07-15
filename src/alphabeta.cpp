@@ -126,6 +126,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
+
+    // TODO: if(!entry_found) entry_found = dbase.get_transposition_value(board,zlo,zhi)
+
     if (entry_found) {
         if(zlo >= beta) {
             return zlo;
@@ -325,10 +328,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         white = board.side ==LIGHT;
         dbase.add_data(board,lo,hi,white,proc_info->excess);
       }
-    set_transposition_value(board,lo,hi);
+      set_transposition_value(board,lo,hi);
     }
     if(proc_info->excess > 0)
       return val;
     else
-     return max_val;
+      return max_val;
 }
