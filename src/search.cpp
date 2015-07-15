@@ -246,6 +246,7 @@ int think(node_t& board,bool parallel)
     int excess = 0;
     for (int i = low; i <= depth[board.side]; i++) // Iterative deepening
     {
+      excess = 0;
       std::cout << "iter(" << i << ")" << std::endl;
       board.depth = i;
       boost::shared_ptr<search_info> info{new search_info};
