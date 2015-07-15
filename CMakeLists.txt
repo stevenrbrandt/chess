@@ -40,13 +40,13 @@ endif()
 
 set(EXTRA_LIBS pthread)
 
-#find_package(Readline)
+find_package(Readline)
 find_package(SQLite3)
 
 if(SQLITE3_FOUND)
   message("Sqlite3 was found")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSQLITE3_SUPPORT")
-  set(EXTRA_LIBS "${EXTRA_LIBS} sqlite3")
+  set(EXTRA_LIBS sqlite3)
 else()
   message("Sqlite3 was *NOT* found")
 endif()
