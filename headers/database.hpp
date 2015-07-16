@@ -108,7 +108,7 @@ class database {
 */
     void add_data(const node_t& board, score_t lo, score_t hi, bool white, int excess){
      #ifdef SQLITE3_SUPPORT
-      //cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
+      cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
       int depth = board.depth;
       auto hash= board.hash;
      const char *sql;    //maybe find a way to make work without const
@@ -197,15 +197,18 @@ class database {
     return o;
     }
 
-    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s){
+    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s,bool exact){
     pseudo v_score;
     #ifdef SQLITE3_SUPPORT
     const char *sql;
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
-    out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE \""<<value<<"\"=\""<<search<<"\" AND \"DEPTH\""<< (white ? ">=": "=") <<board.depth+delta<<" AND \"LO\" >= "<< s<< " ORDER BY DEPTH"<<";";
+    if (exact)
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
+    else
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? ">=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
-        sql = result.c_str();
+    sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
     if (rc!= SQLITE_OK){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -216,7 +219,7 @@ class database {
     return v_score;
     }
 
-  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth){
+  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth, bool exact){
     #ifdef SQLITE3_SUPPORT
     bool gotten = false;
     std::ostringstream current;
@@ -225,12 +228,12 @@ class database {
     const char *select = "HI, LO, DEPTH";
     const char *b = "BOARD";
     std::ostringstream search;
-    pseudo v_score = search_board(board, search, select, b, curr, white, p_board);
+    pseudo v_score = search_board(board, search, select, b, curr, white, p_board,exact);
     if (v_score.size() == 3){
       //int sum_depth = atoi(v_score.at(3).c_str());
       excess_depth = atoi(v_score.at(2).c_str()) - board.depth;
       //int excess= sum_depth-depth;
-      if (score_board(board) < atoi(v_score.at(1).c_str())){
+      if (score_board(board) < atoi(v_score.at(1).c_str()) || exact){
        lower =  atol(v_score.at(1).c_str());
        upper =  atol(v_score.at(0).c_str());
        //cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
