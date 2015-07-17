@@ -106,12 +106,28 @@ class database {
         else{ cout<<zErrMsg<<"/n"; sqlite3_free(zErrMsg);}
   }
 */
-    void add_data(const node_t& board, score_t lo, score_t hi, bool white, int excess){
+    void add_data(node_t& board, score_t lo, score_t hi, bool white, int excess){
      #ifdef SQLITE3_SUPPORT
-      cout<<"This is lo and hi"<<lo<<' '<<hi<<endl;
+      {
+        score_t s_unused;
+        int excess_unused;
+        score_t zlo, zhi;
+        bool found = get_transposition_value(board, zlo, zhi, white,s_unused,excess_unused, true);
+        if(found) {
+          assert(excess == 0);
+          if(lo == zlo && hi == zhi)
+            return;
+          if(board.depth > 2)
+            cout << "Narrowing ";
+          lo = max(lo,zlo);
+          hi = min(hi,zhi);
+        }
+      }
+      if(board.depth > 2)
+        cout << "add_data(" << board.hash <<','<<board.depth<<','<<lo<<','<<hi<<')'<<endl;
       int depth = board.depth;
       auto hash= board.hash;
-     const char *sql;    //maybe find a way to make work without const
+      const char *sql;    //maybe find a way to make work without const
       //create SQL statement from string into char * array
       std::ostringstream bsm;
       print_board(board,bsm,true);
@@ -204,7 +220,7 @@ class database {
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
     if (exact)
-      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth;
     else
       out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? ">=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();

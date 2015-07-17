@@ -244,6 +244,8 @@ int think(node_t& board,bool parallel)
     if(depth[board.side] % 2 == 1)
         low = 1;
     int excess = 0;
+    boost::shared_ptr<search_info> best_info;
+    chess_move best_move;
     for (int i = low; i <= depth[board.side]; i++) // Iterative deepening
     {
       excess = 0; 
@@ -259,22 +261,35 @@ int think(node_t& board,bool parallel)
       f = search_ab(info);
       if (info->excess > 0) {
         excess = info->excess;
+        int reach = excess + info->depth;
         board.follow_capt = true;
-        std::cout << "Excess: " << excess << std::endl;
+        std::cout << "Excess: " << excess << " Reach: " << reach << std::endl;
+        if(best_info == nullptr || reach > best_info->excess + best_info->depth) {
+          best_info = info;
+          best_move = move_to_make;
+          std::cout << "  set best info " << f << std::endl;
+        }
       }
       if (i > depth[board.side])  // if our ply is greater than the iter_depth, then break
       {
         brk = true;
         break;
       }
-
-      boost::shared_ptr<task> new_root{new serial_task};
-      root = new_root;
     }
+
+    // Get the best stuff
+    if(best_info != nullptr) {
+      move_to_make = best_move;
+      board = best_info->board;
+      excess =  best_info->excess;
+      std::cout << "best: " << (excess+board.depth) << std::endl;
+    }
+    std::cout << "p_board = " << board.p_board << std::endl;
+
     if(board.follow_capt && board.follow_depth <= board.search_depth) {
       board.follow_capt = false;
     }
-    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt) {// || score_plus>=board.p_board){
+    if ((f >= board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt) {// || score_plus>=board.p_board){
       if (score_plus>=board.p_board)
         std::cout<<"Greater score"<<std::endl;
       if (board.side == LIGHT){
