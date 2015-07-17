@@ -204,7 +204,7 @@ class database {
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
     if (exact)
-      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     else
       out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? ">=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
@@ -239,7 +239,7 @@ class database {
        //cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
        gotten = true;
        }
-     }
+    }
     else {
       excess_depth = 0;
       lower = bad_min_score;
