@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //  Copyright (c) 2012 Steve Brandt and Phillip LeBlanc
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -99,7 +99,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool entry_found = false;
     int excess =0;
     if (board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess);
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess,false);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
         //if (!board.follow_capt && search_method == MTDF)
@@ -118,7 +118,15 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       db_on = true;
       assert ( g >= zlo); 
       }
-
+    
+    if(!entry_found && board.root_side == LIGHT){
+      entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true);
+      if (excess > proc_info->excess){
+        proc_info->excess = excess;
+        board.follow_capt = true;
+      }
+    }
+   
       
     if (entry_found){
         return zlo;
@@ -127,7 +135,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
 
-    // TODO: if(!entry_found) entry_found = dbase.get_transposition_value(board,zlo,zhi)
 
     if (entry_found) {
         if(zlo >= beta) {
@@ -139,6 +146,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         alpha = max(zlo,alpha);
         beta  = min(zhi,beta);
     }
+
     
     if(alpha >= beta) {
         //proc_info->stop=false;
