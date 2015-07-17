@@ -28,6 +28,7 @@
 
 #include <unistd.h>
 
+#include <fstream>
 #ifdef READLINE_SUPPORT
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -42,7 +43,9 @@ using namespace std;
 double sum_exec_times2 = 0;
 double sum_exec_times = 0;
 int count_exec_times;
-int whiteRec =0, blackRec=0;
+int wRec, bRec;
+std::fstream file("record.txt");
+std::ofstream ofs;
 pcounter task_counter;
 
 
@@ -819,29 +822,35 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     }
   }
   if (i == workq.size()) {
+    while (file>> wRec >> bRec) {}
     if (in_check(board, board.side)) {
       if (board.side == LIGHT){ 
-        blackRec++;
+        bRec++;  
         std::cout << "Result: 0-1 {Black mates} " << std::endl;
       }else{
-        whiteRec++;
+        wRec++;
         std::cout << "Result: 1-0 {White mates}"<< std::endl;
       }
     }else
       std::cout << "Result: 1/2-1/2 {Stalemate}"  << std::endl;
-    std::cout << "Record: " << whiteRec << "-" << blackRec << std::endl;
+    ofs.open ("record.txt");
+    ofs <<"\n"<< wRec<<" " << bRec;
+    ofs.close();
+    std::cout << "Record: " << wRec << "-" << bRec << std::endl;
     return 0;
   }
   else if (reps(board) == 3)
   {
+    while (file >> wRec >> bRec){}
     std::cout << "Result: 1/2-1/2 {Draw by repetition}" << std::endl;
-    std::cout << "Record: " << whiteRec << "-" << blackRec << std::endl;
+    std::cout << "Record: " << wRec << "-" << bRec << std::endl;
     return 0;
   }
   else if (board.fifty >= 100)
   {
+    while (file>> wRec >> bRec){}
     std::cout << "Result: 1/2-1/2 {Draw by fifty chess_move rule}" << std::endl;
-    std::cout << "Record: " << whiteRec << "-" << blackRec << std::endl;
+    std::cout << "Record: " << wRec << "-" << bRec << std::endl;
     return 0;
   }
   return 1;
