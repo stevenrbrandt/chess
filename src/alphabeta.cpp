@@ -124,16 +124,15 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       
     if (entry_found){
         return zlo;
-      }
-    
-    if(!entry_found && board.root_side == LIGHT){
-      entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true);
-      assert(excess == 0);
-    }
+      } 
    
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
 
+    if(!entry_found){
+      entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true);
+      assert(excess == 0);
+    }
 
     if (entry_found) {
         if(zlo >= beta) {
