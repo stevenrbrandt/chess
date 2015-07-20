@@ -159,6 +159,10 @@ int think(node_t& board,bool parallel)
     if (board.follow_depth == 0)
       board.follow_capt = false;
    }
+  if (board.root_side == LIGHT)
+    search_method = light_search_method;
+  else
+    search_method = dark_search_method;
 
   boost::shared_ptr<task> root{new serial_task};
 #ifdef PV_ON
