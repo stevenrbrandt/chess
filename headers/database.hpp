@@ -213,27 +213,27 @@ class database {
     return o;
     }
 
-    pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s,bool exact){
+  pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s,bool exact){
     pseudo v_score;
-    #ifdef SQLITE3_SUPPORT
+#ifdef SQLITE3_SUPPORT
     const char *sql;
     int delta = max(0, board.follow_depth - board.search_depth);
     //std::vector<args> a;
     if (exact)
       out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? "=": "=") <<board.depth<<";";
     else
-      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH"<< (white ? ">=": "=") <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND DEPTH > " <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
     sql = result.c_str();
     rc = sqlite3_exec(db,sql,callback,&v_score ,&zErrMsg);
     if (rc!= SQLITE_OK){
       fprintf(stderr, "SQL error: %s\n", zErrMsg);
       sqlite3_free(zErrMsg);
-      }
-      //fprintf(stdout, "Looked through board successfully\n");
-    #endif
-    return v_score;
     }
+    //fprintf(stdout, "Looked through board successfully\n");
+#endif
+    return v_score;
+  }
 
   bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth, bool exact){
     #ifdef SQLITE3_SUPPORT

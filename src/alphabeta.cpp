@@ -108,7 +108,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       }
       else{
         //board.follow_depth = 0;
-        }
+      }
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
@@ -120,11 +120,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       if (g<zlo)
         std::cout<<"(g,zlo)=("<<g<<","<<zlo<<")"<<std::endl;
       assert ( g >= zlo); 
-      }
+    }
       
     if (entry_found){
-        return zlo;
-      } 
+      return zlo;
+    }
+    
    
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);

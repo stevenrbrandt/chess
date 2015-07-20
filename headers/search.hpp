@@ -27,7 +27,7 @@
 int think(node_t& board,bool parallel);
 score_t search(boost::shared_ptr<search_info>);
 score_t search_ab(boost::shared_ptr<search_info>);
-score_t mtdf(const node_t& board,score_t f,int depth);
+score_t mtdf(node_t& board,score_t f,int depth);
 score_t qeval(boost::shared_ptr<search_info>);
 int reps(const node_t& board);
 bool compare_moves(chess_move a, chess_move b);

@@ -147,10 +147,10 @@ boost::shared_ptr<task> parallel_task(int depth, bool *parallel) {
 // think() calls a search function 
 int think(node_t& board,bool parallel)
 {
-    evaluator ev;
-    DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
-    score_t score_plus = ADD_SCORE(curr,1);
-    board.root_side = board.side;// == LIGHT;
+  evaluator ev;
+  DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
+  score_t score_plus = ADD_SCORE(curr,1);
+  board.root_side = board.side;// == LIGHT;
   if (!board.follow_capt){
     board.p_board = score_plus;
     }
@@ -204,28 +204,16 @@ int think(node_t& board,bool parallel)
     info->alpha = alpha;
     info->beta = beta;
     score_t f(search_ab(info));
-    int excess = info->excess;
-    if ((f > board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt || score_plus>=board.p_board){
-      if (board.side == LIGHT){
-        board.p_board = f;
-        board.follow_capt = true;
-        board.follow_depth = board.depth + excess;
-      }
-      if (board.side == DARK && board.follow_capt){
-        board.follow_capt = false;
-        board.follow_depth = 2;
-      }
-      else{
-      }
-    std::cout<<"Follow"<<board.follow_depth<<std::endl;
-    }
-    
+
+
     while(d < depth[board.side]) {
         d+=stepsize;
+        int excess = 0;
         board.depth = d;
-        // search for boards with a score of 1 higher
-        //score_t f_better = ADD_SCORE(f,1);
         f = mtdf(board,f,d);
+        if(board.follow_capt && board.follow_depth <= board.search_depth) {
+          board.follow_capt = false;
+        }
         boost::shared_ptr<task> new_root{new serial_task};
         root = new_root;
     }
@@ -321,9 +309,12 @@ int think(node_t& board,bool parallel)
 }
 
 /** MTD-f */
-score_t mtdf(const node_t& board,score_t f,int depth)
+score_t mtdf(node_t& board,score_t f,int depth)
 {
     score_t g = f;
+    evaluator ev;
+    DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
+    score_t score_plus = ADD_SCORE(curr,1);
     DECL_SCORE(upper,10000,board.hash);
     DECL_SCORE(lower,-10000,board.hash);
     // Technically, MTD-f uses "zero-width" searches
@@ -342,7 +333,10 @@ score_t mtdf(const node_t& board,score_t f,int depth)
     const int grow_width = 4;//atoi(getenv("GROW_WIDTH"));
     int width = start_width;
     const int max_width = start_width+grow_width*max_tries;
-    score_t alpha = lower, beta = upper;
+    score_t alpha = lower, beta = upper; 
+    boost::shared_ptr<search_info> best_info;
+    chess_move best_move;
+    int excess = 0;
     while(lower < upper) {
         if(width >= max_width) {
             boost::shared_ptr<search_info> info{new search_info};
@@ -362,14 +356,49 @@ score_t mtdf(const node_t& board,score_t f,int depth)
         info->alpha = alpha;
         info->beta = beta;
         g = search_ab(info);
+        int excess = 0;
+        if (info->excess > 0) {
+          excess = info->excess;
+          int reach = excess + info->depth;
+          board.follow_capt = true;
+          std::cout << "Excess: " << excess << " Reach: " << reach << std::endl;
+          if(best_info == nullptr || reach > best_info->excess + best_info->depth) {
+            best_info = info;
+            best_move = move_to_make;
+            std::cout << "  set best info " << f << std::endl;
+          }
+        }   
         if(g < beta) {
-            if(g > alpha)
-                break;
-            upper = g;
+          if(g > alpha){
+            break;
+          }
+          upper = g;
         } else {
-            lower = g;
+          lower = g;
         }
         width += grow_width;
+    }
+
+    if(best_info != nullptr) {
+      move_to_make = best_move;
+      board = best_info->board;
+      int excess =  best_info->excess;
+      std::cout << "best: " << (excess+board.depth) << std::endl;
+    }
+            
+    std::cout << "p_board = " << board.p_board << std::endl;
+    if ((g >= board.p_board && (excess+board.depth)>board.follow_depth) || !board.follow_capt) {// || score_plus>=board.p_board)
+      if (score_plus>=board.p_board)
+        std::cout<<"Greater score"<<std::endl;
+      if (board.side == LIGHT){
+        board.p_board = f;
+        board.follow_capt = true;
+        board.follow_depth = board.depth + excess;
+      }
+      if (board.side == DARK && board.follow_capt){
+        board.follow_capt = false;
+        board.follow_depth = 2;
+      }
     }
     return g;
 }
