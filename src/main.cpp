@@ -1,4 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
+
 //  Copyright (c) 2011 Steve Brandt and Philip LeBlanc
 //
 //  Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -44,7 +45,8 @@ double sum_exec_times2 = 0;
 double sum_exec_times = 0;
 int count_exec_times;
 double wRec, bRec;
-std::fstream file("record.txt");
+char comma;
+fstream file("record.txt");//"ExcelRecord.csv");
 std::ofstream ofs;
 pcounter task_counter;
 
@@ -822,7 +824,7 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     }
   }
   if (i == workq.size()) {
-    while (file>> wRec >> bRec) {}
+    while (file >> wRec >> bRec){}
     if (in_check(board, board.side)) {
       if (board.side == LIGHT){ 
         bRec++;  
@@ -835,8 +837,11 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
       std::cout << "Result: 1/2-1/2 {Stalemate}"  << std::endl;
       wRec += .5;
       bRec += .5;}
-    ofs.open ("record.txt");
-    ofs << wRec<<" " << bRec;
+    ofs.open ("ExcelRecord.csv",std::ios_base::app);
+    ofs << wRec<<"," << bRec<< endl;
+    ofs.close();
+    ofs.open("record.txt");
+    ofs<<wRec<<" "<<bRec<<endl;
     ofs.close();
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
     return 0;
@@ -848,20 +853,26 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     wRec += .5;
     bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
-    ofs.open ("record.txt");
-    ofs << wRec<<" " << bRec;
+    ofs.open ("ExeclRecord.csv");
+    ofs << wRec<<"," << bRec<<endl;
+    ofs.close();
+    ofs.open("record.txt");
+    ofs<<wRec<<" "<<bRec<<endl;
     ofs.close();
     return 0;
   }
   else if (board.fifty >= 100)
   {
-    while (file>> wRec >> bRec){}
+    while (file>> wRec>> bRec){}
     std::cout << "Result: 1/2-1/2 {Draw by fifty chess_move rule}" << std::endl;
     wRec += .5;
     bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
-    ofs.open ("record.txt");
-    ofs << wRec<<" " << bRec;
+    ofs.open ("ExcelRecord.csv");
+    ofs << wRec<<"," << bRec<<endl;
+    ofs.close();
+    ofs.open("record.txt");
+    ofs<<wRec<<" "<<bRec<<endl;
     ofs.close();
     return 0;
   }
