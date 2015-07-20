@@ -43,7 +43,7 @@ using namespace std;
 double sum_exec_times2 = 0;
 double sum_exec_times = 0;
 int count_exec_times;
-int wRec, bRec;
+double wRec, bRec;
 std::fstream file("record.txt");
 std::ofstream ofs;
 pcounter task_counter;
@@ -831,10 +831,12 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
         wRec++;
         std::cout << "Result: 1-0 {White mates}"<< std::endl;
       }
-    }else
+    }else{
       std::cout << "Result: 1/2-1/2 {Stalemate}"  << std::endl;
+      wRec += .5;
+      bRec += .5;}
     ofs.open ("record.txt");
-    ofs <<"\n"<< wRec<<" " << bRec;
+    ofs << wRec<<" " << bRec;
     ofs.close();
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
     return 0;
@@ -843,14 +845,24 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
   {
     while (file >> wRec >> bRec){}
     std::cout << "Result: 1/2-1/2 {Draw by repetition}" << std::endl;
+    wRec += .5;
+    bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
+    ofs.open ("record.txt");
+    ofs << wRec<<" " << bRec;
+    ofs.close();
     return 0;
   }
   else if (board.fifty >= 100)
   {
     while (file>> wRec >> bRec){}
     std::cout << "Result: 1/2-1/2 {Draw by fifty chess_move rule}" << std::endl;
+    wRec += .5;
+    bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
+    ofs.open ("record.txt");
+    ofs << wRec<<" " << bRec;
+    ofs.close();
     return 0;
   }
   return 1;

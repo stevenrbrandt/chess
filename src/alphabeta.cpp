@@ -119,7 +119,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       assert ( g >= zlo); 
       }
     
-    if(!entry_found && board.root_side == LIGHT){
+    if(!entry_found && board.root_side == LIGHT ){
       entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
