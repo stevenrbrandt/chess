@@ -98,8 +98,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool white =board.side == LIGHT;
     bool entry_found = false;
     int excess =0;
+    bool exact = false;
     if (board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
-      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess,false);
+      entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess,exact);
       if (excess > proc_info->excess){
         proc_info->excess = excess;
         //if (!board.follow_capt && search_method == MTDF)
@@ -107,7 +108,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       }
       else{
         //board.follow_depth = 0;
-        }
+      }
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
@@ -116,22 +117,20 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       db_on = false;
       score_t g = search_ab(info);
       db_on = true;
+      if (g<zlo)
+        std::cout<<"(g,zlo)=("<<g<<","<<zlo<<")"<<std::endl;
       assert ( g >= zlo); 
-      }
+    }
+      
+    if (entry_found){
+      return zlo;
+    }
     
     if(!entry_found && board.root_side == LIGHT ){
       entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true);
-      if (excess > proc_info->excess){
-        proc_info->excess = excess;
-        board.follow_capt = true;
-      }
+      assert(excess == 0);
     }
    
-      
-    if (entry_found){
-        return zlo;
-      }
-
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
 
@@ -245,14 +244,13 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             bool found = false; 
             if (child_info->excess > proc_info->excess){
-                max_move.clear();
-                max_move.push_back(child_info->mv);
-                proc_info->excess = child_info->excess;
-                found = true;
-                if (!board.follow_capt){
-                  board.follow_capt = true;
-                  }
-                break;
+              max_move.clear();
+              max_move.push_back(child_info->mv);
+              proc_info->excess = child_info->excess;
+              found = true;
+              if (!board.follow_capt){
+                board.follow_capt = true;
+              }
             }
             
             if (val > max_val || found ) {
@@ -313,6 +311,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       lo = val;
       hi = max_score;
       //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
+      store = false;
     } else if (max_val <= alpha){
       lo = max_val;
       hi = zhi;
