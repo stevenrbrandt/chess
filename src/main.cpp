@@ -410,6 +410,48 @@ int chx_main()
           }
           continue;
         }
+        if (input[0] == "dark") {
+          std::string search_m;
+          try {
+            search_m = input.at(1);
+          }
+          catch (out_of_range&) {
+            std::cout << "Name of search method (minimax,alphabeta,mtdf): "; 
+            std::cin >> search_m;
+          }
+          if (search_m == "minimax") {
+              dark_search_method = MINIMAX;
+          } else if (search_m == "alphabeta") {
+              dark_search_method = ALPHABETA;
+          } else if (search_m == "mtdf") {
+              dark_search_method = MTDF;
+          } else {
+            std::cout << "Invalid method specified." << std::endl;
+          }
+          continue;
+        }
+
+        if (input[0] == "light") {
+          std::string search_m;
+          try {
+            search_m = input.at(1);
+          }
+          catch (out_of_range&) {
+            std::cout << "Name of search method (minimax,alphabeta,mtdf): "; 
+            std::cin >> search_m;
+          }
+          if (search_m == "minimax") {
+              light_search_method = MINIMAX;
+          } else if (search_m == "alphabeta") {
+              light_search_method = ALPHABETA;
+          } else if (search_m == "mtdf") {
+              light_search_method = MTDF;
+          } else {
+            std::cout << "Invalid method specified." << std::endl;
+          }
+          continue;
+        }
+
         if (input[0] == "help") {
           std::cout << std::endl;
           std::cout << "  bench <name of file> <search depth> <number of runs>\n\tstarts the benchmark" << std::endl;
@@ -422,6 +464,16 @@ int chx_main()
                     << "minimax" << (search_method == MINIMAX ? "=current" : "")
                     << ",alphabeta"<< (search_method == ALPHABETA ? "=current" : "")
                     << ",mtdf" << (search_method == MTDF ? "=current" : "")
+                    << ")" << std::endl;
+          std::cout << "  light <function>\n\tswitches the current search method in use (" 
+                    << "minimax" << (light_search_method == MINIMAX ? "=current" : "")
+                    << ",alphabeta"<< (light_search_method == ALPHABETA ? "=current" : "")
+                    << ",mtdf" << (light_search_method == MTDF ? "=current" : "")
+                    << ")" << std::endl;
+          std::cout << "  dark <function>\n\tswitches the current search method in use (" 
+                    << "minimax" << (dark_search_method == MINIMAX ? "=current" : "")
+                    << ",alphabeta"<< (dark_search_method == ALPHABETA ? "=current" : "")
+                    << ",mtdf" << (dark_search_method == MTDF ? "=current" : "")
                     << ")" << std::endl;
           std::cout << "  go\tcomputer makes a chess_move" << std::endl;
           std::cout << "  auto\tcomputer will continue to make moves until game is over" << std::endl;

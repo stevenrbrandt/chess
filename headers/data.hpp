@@ -39,6 +39,8 @@ extern int depth[2];
 extern int output;
 extern int chosen_evaluator;
 extern int search_method;
+extern int light_search_method;
+extern int dark_search_method;
 extern int iter_depth;
 extern int rnum[];
 extern bool bench_mode;
