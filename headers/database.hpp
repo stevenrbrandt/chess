@@ -49,6 +49,7 @@ class database {
         "BOARD               TEXT     NOT NULL,"\
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
+        "EVAL                TEXT     NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
         "SUMDEPTH         INTEGER     NOT NULL,"\
         "PRIMARY KEY (DEPTH, BOARD));";
@@ -66,6 +67,7 @@ class database {
         "BOARD               TEXT     NOT NULL,"\
         "HI               NUMERIC(20) NOT NULL,"\
         "LO               NUMERIC(20) NOT NULL,"\
+        "EVAL                TEXT     NOT NULL,"\
         "HASH             INTEGER     NOT NULL,"\
         "SUMDEPTH         INTEGER     NOT NULL,"\
         "PRIMARY KEY (DEPTH, BOARD));";
@@ -124,7 +126,7 @@ class database {
         }
       }
       if(board.depth > 2)
-        cout << "add_data(" << board.hash <<','<<board.depth<<','<<lo<<','<<hi<<')'<<endl;
+        cout << "add_data(" << board.hash <<','<<board.depth<<','<<lo<<','<<hi<<','<<chosen_evaluator<<')'<<endl;
       int depth = board.depth;
       auto hash= board.hash;
       const char *sql;    //maybe find a way to make work without const
@@ -135,7 +137,7 @@ class database {
 
       std::ostringstream o;
 
-      o<< "INSERT OR REPLACE INTO "<< (white ? "white" : "black") <<" (depth, board, hi, lo, hash, sumdepth) VALUES ("<<excess+depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<hash<< ","<<excess+depth<<");";
+      o<< "INSERT OR REPLACE INTO "<< (white ? "white" : "black") <<" (depth, board, hi, lo,eval, hash, sumdepth) VALUES ("<<excess+depth<<",'"<<bs<<"',"<<hi<<","<<lo<<","<<chosen_evaluator<<","<<hash<< ","<<excess+depth<<");";
       std::string result = o.str();
       sql=result.c_str();
       //char *sql = "REPLACE INTO \"MOVELIST\"VALUES (69,0);";
