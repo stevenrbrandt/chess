@@ -395,7 +395,7 @@ score_t mtdf(node_t& board,score_t f,int depth)
       if (score_plus>=board.p_board)
         std::cout<<"Greater score"<<std::endl;
       if (board.side == LIGHT){
-        board.p_board = f;
+        board.p_board = g;
         board.follow_capt = true;
         board.follow_depth = board.depth + excess;
       }
