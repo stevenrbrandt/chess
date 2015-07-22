@@ -125,8 +125,8 @@ class database {
           hi = min(hi,zhi);
         }
       }
-      if(board.depth > 2)
-        cout << "add_data(" << board.hash <<','<<board.depth<<','<<lo<<','<<hi<<','<<chosen_evaluator<<')'<<endl;
+      //if(board.depth > 2)
+        //cout << "add_data(" << board.hash <<','<<board.depth<<','<<lo<<','<<hi<<','<<chosen_evaluator<<')'<<endl;
       int depth = board.depth;
       auto hash= board.hash;
       const char *sql;    //maybe find a way to make work without const

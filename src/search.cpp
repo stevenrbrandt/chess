@@ -151,14 +151,22 @@ int think(node_t& board,bool parallel)
   DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
   score_t score_plus = ADD_SCORE(curr,1);
   board.root_side = board.side;// == LIGHT;
-  if (!board.follow_capt){
+  score_t target_score;
+  if (board.move_num == 0){
+    board.p_board = score_plus;
+    target_score = score_plus;
+    }
+  else
+    target_score = board.p_board;
+  
+  /*if (!board.follow_capt){
     board.p_board = score_plus;
     }
   else{
     board.follow_depth-=1;
     if (board.follow_depth == 0)
       board.follow_capt = false;
-   }
+   }*/
   if (board.root_side == LIGHT)
     search_method = light_search_method;
   else
@@ -209,18 +217,25 @@ int think(node_t& board,bool parallel)
     info->beta = beta;
     score_t f(search_ab(info));
 
+    score_t moving = target_score;
 
     while(d < depth[board.side]) {
         d+=stepsize;
         int excess = 0;
         board.depth = d;
-        f = mtdf(board,f,d);
+        std::cout << "iter(" << d << ")" << std::endl;
+        f = mtdf(board,f,d,target_score,moving);
+        if (f > target_score){
+          moving = f;
+        }
+        std::cout<< "  d="<< d << " target=" << target_score << " moving="<< moving << " f="<< f<< std::endl;
         if(board.follow_capt && board.follow_depth <= board.search_depth) {
           board.follow_capt = false;
         }
         boost::shared_ptr<task> new_root{new serial_task};
         root = new_root;
     }
+    //board.p_board= ADD_SCORE(target_score,1);
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
   } else if (search_method == ALPHABETA) {
@@ -313,8 +328,7 @@ int think(node_t& board,bool parallel)
 }
 
 /** MTD-f */
-score_t mtdf(node_t& board,score_t f,int depth)
-{
+score_t mtdf(node_t& board,score_t f,int depth,score_t target,score_t moving){
     score_t g = f;
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
@@ -334,13 +348,30 @@ score_t mtdf(node_t& board,score_t f,int depth)
     // If our first guess isn't right, chances are
     // we want to search a little wider the next try
     // to improve our odds.
-    const int grow_width = 4;//atoi(getenv("GROW_WIDTH"));
+    const int grow_width = 1;//atoi(getenv("GROW_WIDTH"));
     int width = start_width;
     const int max_width = start_width+grow_width*max_tries;
-    score_t alpha = lower, beta = upper; 
+    score_t alpha = target, beta = moving; 
     boost::shared_ptr<search_info> best_info;
     chess_move best_move;
     int excess = 0;
+    score_t tmp = board.p_board;
+    boost::shared_ptr<search_info> new_info{new search_info};
+    board.p_board = target;
+    new_info->board = board;
+    new_info->depth = depth;
+    new_info->alpha = alpha;
+    new_info->beta = beta;
+    g = search_ab(new_info);
+    std::cout << " g=" << g << " target="<< target <<std::endl;
+    if (g > target){
+      board.p_board = g;
+      std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
+      return g;
+    }else if (false && g == target){
+      std::cout<<"Cutoff, found score: "<<g<<" p_board: "<<board.p_board<<" tmp: "<<tmp<<std::endl;
+      return g;
+    }
     while(lower < upper) {
         if(width >= max_width) {
             boost::shared_ptr<search_info> info{new search_info};
@@ -360,6 +391,15 @@ score_t mtdf(node_t& board,score_t f,int depth)
         info->alpha = alpha;
         info->beta = beta;
         g = search_ab(info);
+        std::cout << " g=" << g << " target="<< target <<std::endl;
+        if (g > target){
+          board.p_board = g;
+          std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
+          return g;
+        }else if (false && g == target){
+          std::cout<<"Cutoff, found score: "<<g<<" p_board: "<<board.p_board<<" tmp: "<<tmp<<std::endl;
+          return g;
+        }
         int excess = 0;
         if (info->excess > 0) {
           excess = info->excess;
