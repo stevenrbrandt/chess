@@ -144,6 +144,8 @@ boost::shared_ptr<task> parallel_task(int depth, bool *parallel) {
     return t;
 }
 
+score_t target_score;
+
 // think() calls a search function 
 int think(node_t& board,bool parallel)
 {
@@ -151,22 +153,7 @@ int think(node_t& board,bool parallel)
   DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
   score_t score_plus = ADD_SCORE(curr,1);
   board.root_side = board.side;// == LIGHT;
-  score_t target_score;
-  /*if (board.move_num == 0){
-    board.p_board = score_plus;
-    target_score = score_plus;
-    }
-  else
-    target_score = board.p_board;*/
   
-  if (!board.follow_capt){
-    board.p_board = score_plus;
-    }
-  else{
-    board.follow_depth-=1;
-    if (board.follow_depth == 0)
-      board.follow_capt = false;
-   }
   if (board.root_side == LIGHT)
     search_method = light_search_method;
   else
@@ -201,6 +188,10 @@ int think(node_t& board,bool parallel)
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
   } else if (search_method == MTDF) {
+    if (board.move_num == 0){
+      board.p_board = score_plus;
+      target_score = score_plus;
+    }
     root->pfunc = search_ab_f;
     DECL_SCORE(alpha,-10000,board.hash);
     DECL_SCORE(beta,10000,board.hash);
@@ -225,7 +216,7 @@ int think(node_t& board,bool parallel)
         board.depth = d;
         std::cout << "iter(" << d << ")" << std::endl;
         f = mtdf(board,f,d,target_score,moving);
-        if (f > target_score){
+        if (f > moving){
           moving = f;
         }
         std::cout<< "  d="<< d << " target=" << target_score << " moving="<< moving << " f="<< f<< std::endl;
@@ -235,10 +226,18 @@ int think(node_t& board,bool parallel)
         boost::shared_ptr<task> new_root{new serial_task};
         root = new_root;
     }
-    //board.p_board= ADD_SCORE(target_score,1);
+    target_score = ADD_SCORE(f,1);
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
   } else if (search_method == ALPHABETA) {
+    if (!board.follow_capt){
+      board.p_board = score_plus;
+    }
+    else{
+      board.follow_depth-=1;
+      if (board.follow_depth == 0)
+        board.follow_capt = false;
+    }
     root->pfunc = search_ab_f;
     // Initially alpha is -infinity, beta is infinity
     DECL_SCORE(f,0,0);
@@ -356,7 +355,6 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
     chess_move best_move;
     int excess = 0;
     score_t tmp = board.p_board;
-    board.p_board = target;
     while(lower < upper) {
         if(width >= max_width) {
             alpha = lower;
@@ -373,7 +371,7 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
         g = search_ab(info);
         std::cout << " g=" << g << " target="<< target <<std::endl;
         if (g > target){
-          board.p_board = g;
+          target_score = g;
           std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
           return g;
         }else if (g == target){
