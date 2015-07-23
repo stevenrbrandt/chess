@@ -152,21 +152,21 @@ int think(node_t& board,bool parallel)
   score_t score_plus = ADD_SCORE(curr,1);
   board.root_side = board.side;// == LIGHT;
   score_t target_score;
-  if (board.move_num == 0){
+  /*if (board.move_num == 0){
     board.p_board = score_plus;
     target_score = score_plus;
     }
   else
-    target_score = board.p_board;
+    target_score = board.p_board;*/
   
-  /*if (!board.follow_capt){
+  if (!board.follow_capt){
     board.p_board = score_plus;
     }
   else{
     board.follow_depth-=1;
     if (board.follow_depth == 0)
       board.follow_capt = false;
-   }*/
+   }
   if (board.root_side == LIGHT)
     search_method = light_search_method;
   else

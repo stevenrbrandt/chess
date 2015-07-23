@@ -905,7 +905,7 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     wRec += .5;
     bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
-    ofs.open ("ExeclRecord.csv");
+    ofs.open ("ExcelRecord.csv");
     ofs << wRec<<"," << bRec<<endl;
     ofs.close();
     ofs.open("record.txt");
