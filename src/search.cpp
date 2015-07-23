@@ -328,7 +328,7 @@ int think(node_t& board,bool parallel)
 }
 
 /** MTD-f */
-score_t mtdf(node_t& board,score_t f,int depth,score_t target,score_t moving){
+score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t moving){
     score_t g = f;
     evaluator ev;
     DECL_SCORE(curr, ev.eval(board, chosen_evaluator),board.hash);
@@ -340,7 +340,7 @@ score_t mtdf(node_t& board,score_t f,int depth,score_t target,score_t moving){
     // better with a coarser evaluation function. Since
     // this maps readily onto a wider, non-zero width
     // we provide a width setting for optimization.
-    const int start_width = 4;//atoi(getenv("START_WIDTH"));
+    const int start_width = 0;//atoi(getenv("START_WIDTH"));
     // Sometimes MTD-f gets stuck and can try many
     // times without finding an answer. If this happens
     // we want to set a threshold for bailing out.
@@ -351,36 +351,16 @@ score_t mtdf(node_t& board,score_t f,int depth,score_t target,score_t moving){
     const int grow_width = 1;//atoi(getenv("GROW_WIDTH"));
     int width = start_width;
     const int max_width = start_width+grow_width*max_tries;
-    score_t alpha = target, beta = moving; 
+    score_t alpha = ADD_SCORE(target,-width), beta = ADD_SCORE(moving,width+1); 
     boost::shared_ptr<search_info> best_info;
     chess_move best_move;
     int excess = 0;
     score_t tmp = board.p_board;
-    boost::shared_ptr<search_info> new_info{new search_info};
     board.p_board = target;
-    new_info->board = board;
-    new_info->depth = depth;
-    new_info->alpha = alpha;
-    new_info->beta = beta;
-    g = search_ab(new_info);
-    std::cout << " g=" << g << " target="<< target <<std::endl;
-    if (g > target){
-      board.p_board = g;
-      std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
-      return g;
-    }else if (false && g == target){
-      std::cout<<"Cutoff, found score: "<<g<<" p_board: "<<board.p_board<<" tmp: "<<tmp<<std::endl;
-      return g;
-    }
     while(lower < upper) {
         if(width >= max_width) {
-            boost::shared_ptr<search_info> info{new search_info};
-            info->board = board;
-            info->depth = depth;
-            info->alpha = lower;
-            info->beta = upper;
-            g = search_ab(info);
-            break;
+            alpha = lower;
+            beta = upper;
         } else {
             alpha = max(g == lower ? ADD_SCORE(lower,1) : lower, ADD_SCORE(g,    -(1+width/2)));
             beta  = min(g == upper ? ADD_SCORE(upper,-1) : upper, ADD_SCORE(alpha, (1+width)));
@@ -396,7 +376,8 @@ score_t mtdf(node_t& board,score_t f,int depth,score_t target,score_t moving){
           board.p_board = g;
           std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
           return g;
-        }else if (false && g == target){
+        }else if (g == target){
+          std::cout << "SCORE=" << f << std::endl;
           std::cout<<"Cutoff, found score: "<<g<<" p_board: "<<board.p_board<<" tmp: "<<tmp<<std::endl;
           return g;
         }
