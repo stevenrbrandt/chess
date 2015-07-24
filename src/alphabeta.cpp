@@ -337,8 +337,5 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       }
       set_transposition_value(board,lo,hi);
     }
-    if(proc_info->excess > 0)
-      return val;
-    else
-      return max_val;
+    return max_val;
 }

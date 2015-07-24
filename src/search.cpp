@@ -355,6 +355,7 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
     chess_move best_move;
     int excess = 0;
     score_t tmp = board.p_board;
+    g = target;
     while(lower < upper) {
         if(width >= max_width) {
             alpha = lower;
