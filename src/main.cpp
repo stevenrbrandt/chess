@@ -335,6 +335,28 @@ int chx_main()
             std::cout << "Set the number of threads to " << arg << std::endl;
             continue; 
         }
+        if (input[0] == "load") {
+          bench_mode = true;
+          int ply_level;
+          int num_runs;
+          std::string filename;
+          try {
+            filename = input.at(1);
+          }
+          catch (out_of_range&) {
+#ifdef READLINE_SUPPORT
+          buf = readline("Name of file:  ");
+          filename.append(buf);
+          free(buf);
+#else
+          std::cout << "Name of file: ";
+          std::cin >> filename;
+#endif
+          }
+          start_benchmark(filename, 0, 0, false, board);
+          print_board(board,std::cout);
+          continue;
+        }
         if (input[0] == "bench") {
           bench_mode = true;
           int ply_level;
@@ -369,7 +391,7 @@ int chx_main()
             std::cin >> num_runs;
           }
           std::cout << std::endl;
-          start_benchmark(filename, ply_level, num_runs, true);
+          start_benchmark(filename, ply_level, num_runs, true, board);
           continue;
         }
         if (input[0] == "eval") {
@@ -535,62 +557,19 @@ int main(int argc, char *argv[])
 #endif
 }
 
-void start_benchmark(std::string filename, int ply_level, int num_runs,bool parallel)
+void start_benchmark(std::string filename, int ply_level, int num_runs,bool parallel,node_t& board)
 {
   std::ifstream benchfile(filename.c_str());
-
   if (!benchfile.is_open())
   {
     std::cerr << "Unable to open file" << std::endl;
     return;
   }
 
-  depth[LIGHT] = ply_level;
-  depth[DARK]  = ply_level;
-
-  node_t board;
-
-  init_board(board);
-
   int line_num = -1;
   char c;
   int spot;
-
-  // Logging to file code
-  std::string logfilename = get_log_name();
-
-  std::ofstream logfile;
-  if (logging_enabled)
-    logfile.open(logfilename.c_str());
-  else
-    logfile.open("/dev/null");
-
-  std::cout << "Using benchmark file: '" << filename << "'" << std::endl;
-  std::cout << "  ply level: " << ply_level << std::endl;
-  std::cout << "  num runs: " << num_runs << std::endl;
-
-  logfile << "Using benchmark file: '" << filename << "'" << std::endl;
-  logfile << "  ply level: " << ply_level << std::endl;
-  logfile << "  num runs: " << num_runs << std::endl;
-  if (chosen_evaluator == ORIGINAL) {
-    std::cout << "  evaluator: original" << std::endl;
-    logfile << "  evaluator: original" << std::endl;
-  } else if (chosen_evaluator == SIMPLE) {
-    std::cout << "  evaluator: simple" << std::endl;
-    logfile << "  evaluator: simple" << std::endl;
-  }
-
-  if (search_method == MINIMAX) {
-    std::cout << "  search method: minimax" << std::endl;
-    logfile << "  search method: minimax" << std::endl;
-  } else if (search_method == ALPHABETA) {
-    std::cout << "  search method: alpha-beta" << std::endl;
-    logfile << "  search method: alpha-beta" << std::endl;
-  } else if (search_method == MTDF) {
-    std::cout << "  search method: MTD-f" << std::endl;
-    logfile << "  search method: MTD-f" << std::endl;
-  }
-
+  init_board(board);
   // reading board configuration
   std::string line;
   while ( benchfile.good() )
@@ -680,6 +659,46 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
   if(line_num != 8)
       throw line_num;
   benchfile.close();
+  if(num_runs == 0)
+    return;
+
+  depth[LIGHT] = ply_level;
+  depth[DARK]  = ply_level;
+
+  // Logging to file code
+  std::string logfilename = get_log_name();
+
+  std::ofstream logfile;
+  if (logging_enabled)
+    logfile.open(logfilename.c_str());
+  else
+    logfile.open("/dev/null");
+
+  std::cout << "Using benchmark file: '" << filename << "'" << std::endl;
+  std::cout << "  ply level: " << ply_level << std::endl;
+  std::cout << "  num runs: " << num_runs << std::endl;
+
+  logfile << "Using benchmark file: '" << filename << "'" << std::endl;
+  logfile << "  ply level: " << ply_level << std::endl;
+  logfile << "  num runs: " << num_runs << std::endl;
+  if (chosen_evaluator == ORIGINAL) {
+    std::cout << "  evaluator: original" << std::endl;
+    logfile << "  evaluator: original" << std::endl;
+  } else if (chosen_evaluator == SIMPLE) {
+    std::cout << "  evaluator: simple" << std::endl;
+    logfile << "  evaluator: simple" << std::endl;
+  }
+
+  if (search_method == MINIMAX) {
+    std::cout << "  search method: minimax" << std::endl;
+    logfile << "  search method: minimax" << std::endl;
+  } else if (search_method == ALPHABETA) {
+    std::cout << "  search method: alpha-beta" << std::endl;
+    logfile << "  search method: alpha-beta" << std::endl;
+  } else if (search_method == MTDF) {
+    std::cout << "  search method: MTD-f" << std::endl;
+    logfile << "  search method: MTD-f" << std::endl;
+  }
 
   board.side = LIGHT;
   board.castle = 15;
@@ -753,7 +772,6 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
   logfile << "Average time for run: " << (int)average_time << " ms" << std::endl;
 
   logfile.close(); // Close the open file
-
 }
 
 /* parse the chess_move s (in coordinate notation) and return the chess_move's

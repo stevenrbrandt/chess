@@ -21,7 +21,7 @@ int parse_move(std::vector<chess_move>& workq, const char *s, const node_t& boar
 char *move_str(chess_move& m);
 void print_board(const node_t& board, std::ostream& out,bool trimmed=false);
 int print_result(std::vector<chess_move>& workq, node_t& board);
-void start_benchmark(std::string filename, int ply_level, int num_runs,bool parallel);
+void start_benchmark(std::string filename, int ply_level, int num_runs,bool parallel,node_t& n);
 int get_ms();
 std::string get_log_name();
 int chx_main();
