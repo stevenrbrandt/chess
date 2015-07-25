@@ -304,7 +304,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool store = true;
     score_t lo, hi;
     if(proc_info->excess) {
-      lo = val;
+      lo = max_val;
       hi = max_score;
       //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
       store = false;
