@@ -324,7 +324,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       store = false;
       lo = hi = 0;
     }
-    assert(store && lo <= hi);
+    if(store && lo > hi) {
+      std::cout << "lo=" << lo << " hi=" << hi << std::endl;
+      abort();
+    }
 
     if(store) {
       if (board.root_side == LIGHT && board.depth + proc_info->excess > 1) {
