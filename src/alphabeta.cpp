@@ -91,7 +91,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         return z;
     }
 
-
     score_t max_val = bad_min_score;
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
@@ -125,7 +124,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     if (entry_found){
       return zlo;
     }
-    
    
     if(!entry_found)
       entry_found = get_transposition_value (board, zlo, zhi);
@@ -226,7 +224,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
             boost::shared_ptr<search_info> child_info = child_task->info;
             
             tasks.erase(tasks.begin()+n);
-           
 
             if(!children_aborted && (aborted || child_info->get_abort())) {
                 for(unsigned int m = 0;m < tasks.size();m++) {
@@ -234,7 +231,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 }
                 children_aborted = true;
             }
-            
 
             //child_task->join();
             if(child_info->get_abort()) 
@@ -312,17 +308,17 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       hi = max_score;
       //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
       store = false;
-    } else if (max_val <= alpha){
-      lo = max_val;
-      hi = zhi;
-      if(lo == zlo)
-        store = false;
-    } else if(alpha < max_val && max_val < beta) {
-      lo = hi = max_val;
-    } else if(max_val >= beta) {
+    } else if (max_val < beta){
       hi = max_val;
       lo = zlo;
       if(hi == zhi)
+        store = false;
+    } else if(alpha < max_val && max_val < beta) {
+      lo = hi = max_val;
+    } else if(max_val > alpha) {
+      lo = max_val;
+      hi = zhi;
+      if(lo == zlo)
         store = false;
     } else {
       store = false;

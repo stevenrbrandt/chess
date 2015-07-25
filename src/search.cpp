@@ -195,10 +195,8 @@ int think(node_t& board,bool parallel)
     root->pfunc = search_ab_f;
     DECL_SCORE(alpha,-10000,board.hash);
     DECL_SCORE(beta,10000,board.hash);
-    int stepsize = 2;
-    int d = depth[board.side] % stepsize;
-    if(d == 0)
-        d = stepsize;
+    const int stepsize = 1;
+    int d = 2;//depth[board.side] % stepsize;
     board.search_depth = depth[board.side];
     board.depth = d;
     boost::shared_ptr<search_info> info{new search_info};
@@ -343,11 +341,29 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
     // Sometimes MTD-f gets stuck and can try many
     // times without finding an answer. If this happens
     // we want to set a threshold for bailing out.
-    const int max_tries = 4;//atoi(getenv("MAX_TRIES"));
+    const int max_tries = 9;//atoi(getenv("MAX_TRIES"));
     // If our first guess isn't right, chances are
     // we want to search a little wider the next try
     // to improve our odds.
-    const int grow_width = 1;//atoi(getenv("GROW_WIDTH"));
+    const int grow_width = 2;//atoi(getenv("GROW_WIDTH"));
+
+    const bool test_mtdf = false;
+
+    score_t g2;
+    if(test_mtdf) {
+      boost::shared_ptr<search_info> info{new search_info};
+      info->board = board;
+      info->depth = depth;
+      info->alpha = -max_score;
+      info->beta = max_score;
+      g2 = search_ab(info);
+      for(int i=0;i<table_size;i++) {
+        transposition_table[i].depth = -1;
+        transposition_table[i].lower = bad_min_score;
+        transposition_table[i].upper = bad_max_score;
+      }
+    }
+
     int width = start_width;
     const int max_width = start_width+grow_width*max_tries;
     score_t alpha = ADD_SCORE(target,-width), beta = ADD_SCORE(moving,width+1); 
@@ -361,8 +377,17 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
             alpha = lower;
             beta = upper;
         } else {
-            alpha = max(g == lower ? ADD_SCORE(lower,1) : lower, ADD_SCORE(g,    -(1+width/2)));
-            beta  = min(g == upper ? ADD_SCORE(upper,-1) : upper, ADD_SCORE(alpha, (1+width)));
+          if(g == lower) {
+            beta = ADD_SCORE(g,+1);
+            alpha = ADD_SCORE(beta,-1);
+            alpha = ADD_SCORE(alpha,width);
+          } else {
+            beta = g;
+            alpha = ADD_SCORE(beta,-1);
+            beta = ADD_SCORE(beta,-width);
+          }
+          alpha = max(alpha,lower);
+          beta  = min(beta ,upper);
         }
         boost::shared_ptr<search_info> info{new search_info};
         info->board = board;
@@ -371,15 +396,6 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
         info->beta = beta;
         g = search_ab(info);
         std::cout << " g=" << g << " target="<< target <<std::endl;
-        if (g > target){
-          target_score = g;
-          std::cout<<"!!!!!! Cutoff, found better score: "<<g<<std::endl;
-          return g;
-        }else if (g == target){
-          std::cout << "SCORE=" << f << std::endl;
-          std::cout<<"Cutoff, found score: "<<g<<" p_board: "<<board.p_board<<" tmp: "<<tmp<<std::endl;
-          return g;
-        }
         int excess = 0;
         if (info->excess > 0) {
           excess = info->excess;
@@ -391,16 +407,22 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
             best_move = move_to_make;
             std::cout << "  set best info " << f << std::endl;
           }
-        }   
+        }
         if(g < beta) {
-          if(g > alpha){
+          upper = g;
+        }
+        if(g > alpha) {
+          lower = g;
+          if(!test_mtdf && lower >= target) {
+            std::cout << "First blood!" << std::endl;
             break;
           }
-          upper = g;
-        } else {
-          lower = g;
         }
         width += grow_width;
+    }
+    if(test_mtdf && g != g2) {
+      std::cerr << "g=" << g << " g2=" << g2 << " lower=" << lower << " upper=" << upper << std::endl;
+      abort();
     }
 
     if(best_info != nullptr) {
@@ -509,7 +531,8 @@ zkey_t transposition_table[table_size];
 bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) {
     bool gotten = false;
 #ifdef TRANSPOSE_ON
-    int n = iabs((board.hash << 4) ^ board.depth) % table_size;
+    int side = board.side == LIGHT ? 1 : 0;
+    int n = iabs((((board.hash << 4) ^ board.depth) << 1) | side) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(z->depth >= 0 && board_equals(board,z->board)) {
@@ -526,7 +549,9 @@ bool get_transposition_value(const node_t& board,score_t& lower,score_t& upper) 
 
 void set_transposition_value(const node_t& board,score_t lower,score_t upper) {
 #ifdef TRANSPOSE_ON
-    int n = iabs((board.hash << 4) ^ board.depth) % table_size;
+    assert(lower <= upper);
+    int side = board.side == LIGHT ? 1 : 0;
+    int n = iabs((((board.hash << 4) ^ board.depth) << 1) | side) % table_size;
     zkey_t *z = &transposition_table[n];
     ScopedLock s(z->mut);
     if(board.depth == 1 || board.depth >= z->depth) {
