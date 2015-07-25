@@ -355,6 +355,7 @@ int chx_main()
           }
           start_benchmark(filename, 0, 0, false, board);
           print_board(board,std::cout);
+          gen(workq, board);
           continue;
         }
         if (input[0] == "bench") {
@@ -512,9 +513,13 @@ int chx_main()
         }
 
         int m;
+        char let[] = {'a','b','c','d','e','f','g','h'};
         m = parse_move(workq, s.c_str(), board);
         chess_move mov;
         mov = m;
+        int f = mov.getFrom();
+        int t = mov.getTo();
+        //std::cout << "MOVE " << f << "/" << t << ":" << let[f & 7] << (8-(f>>3)) << "/" << let[t & 7] << (8-(t>>3)) << "(" << s << ")" << std::endl;
         node_t newboard = board;
         if (m == -1 || !makemove(newboard, mov))
             std::cout << "Illegal chess_move or command." << std::endl;
@@ -620,6 +625,7 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
             break;
           default:
             //error
+            i--;
             break;
         }
       }
@@ -648,8 +654,11 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
             break;
           default:
             //error
+            i--;
             break;
         }
+      } else {
+        i--;
       }
     }
     if(i >= 0 && i < 7) {
@@ -818,8 +827,10 @@ int parse_move(std::vector<chess_move>& workq, const char *s, const node_t& boar
   if (s[0] < 'a' || s[0] > 'h' ||
       s[1] < '0' || s[1] > '9' ||
       s[2] < 'a' || s[2] > 'h' ||
-      s[3] < '0' || s[3] > '9')
+      s[3] < '0' || s[3] > '9') {
+    std::cout << "bad char" << std::endl;
     return -1;
+  }
 
   from = s[0] - 'a';
   from += 8 * (8 - (s[1] - '0'));
