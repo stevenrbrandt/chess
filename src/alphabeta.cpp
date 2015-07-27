@@ -111,7 +111,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       boost::shared_ptr<search_info> info{new search_info};
       info->board = board;
       info->alpha = zlo;
-      info->beta = zlo;
+      info->beta = zlo+1;
       info->depth = board.depth + excess;
       db_on = false;
       score_t g = search_ab(info);
