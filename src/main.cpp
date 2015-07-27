@@ -918,7 +918,7 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
       std::cout << "Result: 1/2-1/2 {Stalemate}"  << std::endl;
       wRec += .5;
       bRec += .5;}
-    ofs.open ("ExcelRecord.csv",std::ios_base::app);
+    ofs.open ("ExcelRecord.csv",std::ofstream::app);
     ofs << wRec<<"," << bRec<< endl;
     ofs.close();
     ofs.open("record.txt");
@@ -934,7 +934,7 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     wRec += .5;
     bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
-    ofs.open ("ExcelRecord.csv");
+    ofs.open ("ExcelRecord.csv",std::ofstream::app);
     ofs << wRec<<"," << bRec<<endl;
     ofs.close();
     ofs.open("record.txt");
@@ -949,7 +949,7 @@ int print_result(std::vector<chess_move>& workq, node_t& board)
     wRec += .5;
     bRec += .5;
     std::cout << "Record: " << wRec << "-" << bRec << std::endl;
-    ofs.open ("ExcelRecord.csv");
+    ofs.open ("ExcelRecord.csv",std::ofstream::app);
     ofs << wRec<<"," << bRec<<endl;
     ofs.close();
     ofs.open("record.txt");
