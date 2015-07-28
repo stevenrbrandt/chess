@@ -471,8 +471,11 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
 int reps(const node_t& board)
 {
   int i;
-  int r1 = 0;
+  int r1 = 1;
   int r2 = 0;
+  if(board.hist_dat.size()==0)
+    return 0;
+  hash_t h2 = board.hist_dat[board.hist_dat.size()-1];
 
   for (i = 0; i < board.hist_dat.size(); ++i) {
     assert(i < board.hist_dat.size());
@@ -480,7 +483,7 @@ int reps(const node_t& board)
     if (board.hist_dat[i] == board.hash)
       ++r1;
     if(r1 == 3) return 3;
-    if (i > 0 && board.hist_dat[i] == board.hist_dat[0])
+    if (board.hist_dat[i] == h2)
       ++r2;
     if(r2 == 3) return 3;
   }

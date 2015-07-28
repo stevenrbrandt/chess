@@ -183,7 +183,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
                 t->info = child_info;
                 int d = depth - 1;
-                if(!test_alphabeta && d == 1 && capture(board,g)) {
+                if(!test_alphabeta && d == 0 && capture(board,g)) {
                   d = 1;
                   t->info->quiescent = true;
                 } else if(proc_info->quiescent) {
