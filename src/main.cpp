@@ -550,6 +550,9 @@ int chx_threads_per_proc() {
 
 int main(int argc, char *argv[])
 {
+    int pid = getpid();
+    int tim = time(0);
+    srand(pid ^ tim);
     int threads_per_proc = chx_threads_per_proc();
     task_counter.add(threads_per_proc);
     chx_terminate();

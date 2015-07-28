@@ -309,12 +309,13 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
       store = false;
     } else if (max_val < beta){
-      hi = max_val;
+      hi = max_val+1;
       lo = zlo;
       if(hi == zhi)
         store = false;
     } else if(alpha < max_val && max_val < beta) {
-      lo = hi = max_val;
+      lo = max_val;
+      hi = max_val+1;
     } else if(max_val > alpha) {
       lo = max_val;
       hi = zhi;
