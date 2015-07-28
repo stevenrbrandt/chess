@@ -80,7 +80,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
        to pick a chess_move and can't simply return 0) then check to
        see if the position is a repeat. if so, we can assume that
        this line is a draw and return 0. */
-    if (board.ply && reps(board)) {
+    if (board.ply && reps(board)==3) {
         DECL_SCORE(z,0,board.hash);
         return z;
     }
@@ -183,7 +183,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
                 t->info = child_info;
                 int d = depth - 1;
-                if(d == 0 && capture(board,g)) {
+                if(!test_alphabeta && d == 1 && capture(board,g)) {
                   d = 1;
                   t->info->quiescent = true;
                 } else if(proc_info->quiescent) {
@@ -191,9 +191,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 }
                 t->info->board.depth = child_info->depth = d;
                 assert(depth >= 0);
-                t->info->alpha = -beta;
-                t->info->beta = -alpha;
-                t->info->result = -beta;
+                t->info->alpha = -(beta-1);
+                t->info->beta = -(alpha-1);
                 t->info->mv = g;
                 t->pfunc = search_ab_f;
                 t->start();
@@ -240,8 +239,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
             bool found = false; 
             if (child_info->excess > proc_info->excess){
-              max_move.clear();
-              max_move.push_back(child_info->mv);
               proc_info->excess = child_info->excess;
               found = true;
               if (!board.follow_capt){
@@ -294,12 +291,6 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         ScopedLock s(cmutex);
         move_to_make = max_move.at(rand() % max_move.size());
     }
-
-    // fifty chess_move draw rule
-    if (board.fifty >= 100) {
-        DECL_SCORE(z,0,board.hash);
-        return z;    
-    }
     
     bool store = true;
     score_t lo, hi;
@@ -329,6 +320,10 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       std::cout << "lo=" << lo << " hi=" << hi << std::endl;
       abort();
     }
+
+    // Don't save moves leading to a draw
+    if(board.move_num > 10 && (lo == 0 || hi == 0))
+      store = false;
 
     if(store) {
       if (board.root_side == LIGHT && board.depth + proc_info->excess > 1) {

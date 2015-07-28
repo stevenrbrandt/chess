@@ -23,6 +23,10 @@
 #include <fstream>
 #include <sstream>
 
+const bool test_mtdf = false;
+
+#define TRANSPOSE_ON 1
+
 Mutex cmutex;
 const int num_proc = chx_threads_per_proc();
 
@@ -228,6 +232,14 @@ int think(node_t& board,bool parallel)
     if (bench_mode)
       std::cout << "SCORE=" << f << std::endl;
   } else if (search_method == ALPHABETA) {
+    score_t mf=0;
+    if(test_alphabeta) {
+      boost::shared_ptr<search_info> info{new search_info};
+      info->board = board;
+      info->depth = depth[board.side];
+      mf = -search(info);
+      std::cout << "mf=" << mf << std::endl;
+    }
     if (!board.follow_capt){
       board.p_board = score_plus;
     }
@@ -276,6 +288,9 @@ int think(node_t& board,bool parallel)
       }
       if (i > depth[board.side])  // if our ply is greater than the iter_depth, then break
       {
+        if(test_alphabeta) {
+          assert(f == mf);
+        }
         brk = true;
         break;
       }
@@ -346,8 +361,6 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
     // we want to search a little wider the next try
     // to improve our odds.
     const int grow_width = 2;//atoi(getenv("GROW_WIDTH"));
-
-    const bool test_mtdf = false;
 
     score_t g2;
     if(test_mtdf) {
@@ -458,16 +471,20 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
 int reps(const node_t& board)
 {
   int i;
-  int r = 0;
+  int r1 = 0;
+  int r2 = 0;
 
-  // TODO: Warning! Why are we checking hist_dat.size() here?
-  for (i = 0; i < board.fifty && i < board.hist_dat.size(); ++i) {
+  for (i = 0; i < board.hist_dat.size(); ++i) {
     assert(i < board.hist_dat.size());
     assert(board.hash != 0);
     if (board.hist_dat[i] == board.hash)
-      ++r;
+      ++r1;
+    if(r1 == 3) return 3;
+    if (i > 0 && board.hist_dat[i] == board.hist_dat[0])
+      ++r2;
+    if(r2 == 3) return 3;
   }
-  return r;
+  return max(r1,r2);
 }
 
 
@@ -516,8 +533,6 @@ void sort_pv(std::vector<chess_move>& workq, int index)
       mqswap(workq,i1,i2);
   }
 }
-
-#define TRANSPOSE_ON 1
 
 inline int iabs(int n) {
   if(n < 0)

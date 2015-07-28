@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <iostream>
 
 /* This is the basic description of a chess_move. promote is what
    piece to promote the pawn to, if the chess_move is a pawn
@@ -104,5 +105,9 @@ public:
     std::string str() const;
     std::string pgn() const;
 };
+
+inline std::ostream& operator<<(std::ostream& o,const chess_move& mv) {
+  return o << mv.str();
+}
 
 #endif

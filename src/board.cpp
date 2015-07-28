@@ -36,7 +36,7 @@ void init_board(node_t& board)
     board.move_num = 0;
     board.ply = 0;
     board.hply = 0;
-    board.hist_dat.resize(10);
+    board.hist_dat.clear();
     // init_hash() must be called before this function
     board.hash = set_hash(board);  
     board.follow_capt = false;

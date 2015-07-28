@@ -59,6 +59,8 @@ private:
 };
 extern std::vector<safe_move> pv;  // Principle Variation, used in iterative deepening
 
+// Note that testing alphabeta disables iterative deepening
+const bool test_alphabeta = false;
 
 #define PV_ON 1
 

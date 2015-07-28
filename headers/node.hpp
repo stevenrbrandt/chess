@@ -13,7 +13,6 @@
 #include "score.hpp"
 #include "defs.hpp"
 #include "hash.hpp"
-#include "FixedVec.hpp"
 
 struct base_node_t { 
     hash_t hash;
@@ -37,10 +36,9 @@ struct base_node_t {
     int search_depth = 0;
     int ply;
     int hply;
-    //std::vector<hash_t> hist_dat;
 };
 struct node_t : public base_node_t {
-    FixedVec<hash_t,50> hist_dat;
+    std::vector<hash_t> hist_dat;
 };
 
 #endif
