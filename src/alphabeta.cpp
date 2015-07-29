@@ -65,6 +65,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     node_t board = proc_info->board;
     int depth = proc_info->depth;
     score_t alpha = proc_info->alpha;
+    const score_t alpha0 = alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
     // if we are a leaf node, return the value from the eval() function
@@ -299,18 +300,18 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       hi = max_score;
       //std::cout<<"Max depth: "<<proc_info->excess+depth<<std::endl;
       store = false;
-    } else if (max_val < beta){
-      hi = max_val+1;
-      lo = zlo;
-      if(hi == zhi)
-        store = false;
-    } else if(alpha < max_val && max_val < beta) {
+    } else if(alpha0 < max_val && max_val < beta) {
       lo = max_val;
       hi = max_val+1;
-    } else if(max_val > alpha) {
+    } else if(max_val <= alpha0) {
+      hi = max_val;
+      lo = zlo;
+      if(lo == zlo)
+        store = false;
+    } else if (max_val >= beta){
       lo = max_val;
       hi = zhi;
-      if(lo == zlo)
+      if(hi == zhi)
         store = false;
     } else {
       store = false;
@@ -326,10 +327,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       store = false;
 
     if(store) {
-      if (board.root_side == LIGHT && board.depth + proc_info->excess > 1) {
-        white = board.side ==LIGHT;
-        dbase.add_data(board,lo,hi,white,proc_info->excess);
-      }
+      dbase.add_data(board,lo,hi,white,proc_info->excess);
       set_transposition_value(board,lo,hi);
     }
     return max_val;

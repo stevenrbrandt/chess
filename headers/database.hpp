@@ -110,6 +110,7 @@ class database {
 */
     void add_data(node_t& board, score_t lo, score_t hi, bool white, int excess){
      #ifdef SQLITE3_SUPPORT
+      white == board.side == LIGHT;
       {
         score_t s_unused;
         int excess_unused;
