@@ -25,7 +25,7 @@
 
 const bool test_mtdf = false;
 
-#define TRANSPOSE_ON 1
+//#define TRANSPOSE_ON 1
 
 Mutex cmutex;
 const int num_proc = chx_threads_per_proc();

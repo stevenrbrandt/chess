@@ -101,6 +101,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool exact = false;
     if (board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess,exact,board.depth);
+      int pe = proc_info->excess;
       if (excess > proc_info->excess){
         proc_info->excess = excess;
         //if (!board.follow_capt && search_method == MTDF)
@@ -119,14 +120,19 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       db_on = true;
       if (g<zlo)
         std::cout<<"(g,zlo)=("<<g<<","<<zlo<<")"<<std::endl;
-      assert ( g >= zlo); 
+      //assert ( g >= zlo); 
+      if(g < zlo) {
+        entry_found = false;
+        excess = 0;
+        proc_info->excess = pe;
+      }
     }
       
     if (entry_found){
       return zlo;
     }
    
-    if(!entry_found)
+    if(!entry_found && db_on)
       entry_found = get_transposition_value (board, zlo, zhi);
 
     if(!entry_found){
