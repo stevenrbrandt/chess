@@ -115,7 +115,7 @@ class database {
         score_t s_unused;
         int excess_unused;
         score_t zlo, zhi;
-        bool found = get_transposition_value(board, zlo, zhi, white,s_unused,excess_unused, true);
+        bool found = get_transposition_value(board, zlo, zhi, white,s_unused,excess_unused, true,board.depth+excess);
         if(found) {
           assert(excess == 0);
           if(lo == zlo && hi == zhi)
@@ -216,14 +216,15 @@ class database {
     return o;
     }
 
-  pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s,bool exact){
+  pseudo search_board(const node_t& board,std::ostringstream& out, const char *select, const char *value, std::string& search, bool white, score_t s,bool exact, int depth){
     pseudo v_score;
 #ifdef SQLITE3_SUPPORT
     const char *sql;
     int delta = max(0, board.follow_depth - board.search_depth);
+    //int delta = max(0, depth - board.depth);
     //std::vector<args> a;
     if (exact)
-      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND EVAL="<<chosen_evaluator<<" AND DEPTH"<< (white ? "=": "=") <<board.depth<<";";
+      out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND EVAL="<<chosen_evaluator<<" AND DEPTH"<< (white ? "=": "=") <<depth<<";";
     else
       out<< "SELECT "<<select<<" FROM "<<( white ? "white" : "black") <<" WHERE "<<value<<"=\""<<search<<"\" AND EVAL="<<chosen_evaluator<<" AND DEPTH > " <<board.depth+delta<<" AND LO>="<< s<< " ORDER BY DEPTH"<<";";
     std::string result = out.str();
@@ -238,7 +239,7 @@ class database {
     return v_score;
   }
 
-  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth, bool exact){
+  bool get_transposition_value(node_t& board, score_t& lower, score_t& upper, bool white,score_t& p_board,int& excess_depth, bool exact, int depth){
     #ifdef SQLITE3_SUPPORT
     bool gotten = false;
     std::ostringstream current;
@@ -247,7 +248,7 @@ class database {
     const char *select = "HI, LO, DEPTH";
     const char *b = "BOARD";
     std::ostringstream search;
-    pseudo v_score = search_board(board, search, select, b, curr, white, p_board,exact);
+    pseudo v_score = search_board(board, search, select, b, curr, white, p_board,exact, depth);
     if (v_score.size() == 3){
       //int sum_depth = atoi(v_score.at(3).c_str());
       excess_depth = atoi(v_score.at(2).c_str()) - board.depth;
