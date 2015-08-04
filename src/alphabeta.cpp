@@ -273,8 +273,8 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
                 }
                 t->info->board.depth = child_info->depth = d;
                 assert(depth >= 0);
-                t->info->alpha = -(beta-1);
-                t->info->beta = -(alpha-1);
+                t->info->alpha = -beta;
+                t->info->beta = -alpha;
                 t->info->mv = g;
                 t->pfunc = search_ab_f;
                 t->start();
