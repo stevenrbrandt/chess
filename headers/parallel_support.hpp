@@ -15,6 +15,7 @@
 #include "parallel.hpp"
 #include <boost/shared_ptr.hpp>
 #include <future>
+#include <sstream>
 
 extern bool par_enabled;
 int chx_threads_per_proc();
@@ -23,35 +24,38 @@ struct task;
 
 struct search_info {
 private:
-    boost::atomic<bool>  abort_flag_;
-    boost::atomic<bool> *abort_flag;
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version) {
       // TODO: Write a real serializer
       abort();
     }
 public:
+    std::ostringstream log;
+    boost::atomic<bool>  abort_flag_;
+    boost::atomic<bool> *abort_flag;
     bool get_abort() { return *abort_flag; }
     void set_abort(bool b) { *abort_flag = b; }
     void set_abort_ref(search_info *s) {
         abort_flag = s->abort_flag;
     }
+    bool use_srand = false;
     node_t board;
     bool par_done;
     chess_move mv;
     score_t result;
     int depth;
-    int incr;
+    int incr=0;
     score_t alpha;
     score_t beta;
-    score_t printed_board;
+    score_t printed_board=0;
     int excess;
     bool quiescent;
-    search_info(const node_t& board_) : abort_flag_(false), abort_flag(&abort_flag_), board(board_),
-            result(bad_min_score),excess(0),quiescent(false) {
-    }
+    bool draw;
+    search_info(const node_t& board_) : abort_flag_(false), abort_flag(&abort_flag_), board(board_), par_done(false), 
+            result(bad_min_score),excess(0),quiescent(false), draw(false) {
+            }
 
-    search_info() : abort_flag_(false), abort_flag(&abort_flag_),excess(0),quiescent(false) {
+    search_info() : abort_flag_(false), abort_flag(&abort_flag_), par_done(false), result(bad_min_score), excess(0),quiescent(false),draw(false) {
     }
 
     ~search_info() {
@@ -61,6 +65,52 @@ public:
     friend hpx::serialization::access;
 #endif
 };
+
+void print_board(const node_t& board, std::ostream& out,bool trimmed=false);
+
+#define INFO(X) o << " " << #X << "=" << info->X;
+inline
+std::ostream& operator<<(std::ostream& o,boost::shared_ptr<search_info> info) {
+  print_board(info->board,o,true);
+  print_board(info->board,o,false);
+  INFO(board.hash);
+  INFO(board.excess_depth);
+  INFO(board.side);
+  INFO(board.castle);
+  INFO(board.ep);
+  INFO(board.move_num);
+  INFO(board.follow_capt);
+  INFO(board.root_side);
+  INFO(board.follow_score);
+  INFO(board.follow_depth);
+  INFO(board.search_depth);
+  INFO(board.ply);
+  INFO(board.p_board);
+  INFO(board.fifty);
+  INFO(board.hist_dat.size());
+  node_t& board = info->board;
+  o << " hist={";
+  for(int i=0;i<board.hist_dat.size();i++) {
+    if(i > 0) o << ",";
+    o << board.hist_dat.at(i);
+  }
+  o << "}" << std::endl;
+  INFO(mv.str());
+  INFO(par_done);
+  INFO(result);
+  INFO(depth);
+  INFO(alpha);
+  INFO(beta);
+  INFO(printed_board);
+  INFO(excess);
+  INFO(quiescent);
+  INFO(draw);
+  INFO(incr);
+  INFO(abort_flag);
+  INFO(abort_flag_);
+  INFO(log.str());
+  return o;
+}
 
 void search_pt(boost::shared_ptr<search_info>);
 void search_ab_pt(boost::shared_ptr<search_info>);

@@ -110,6 +110,8 @@ class database {
 */
     void add_data(node_t& board, score_t lo, score_t hi, bool white, int excess){
      #ifdef SQLITE3_SUPPORT
+      assert(lo < hi);
+      assert(excess == 0);
       white == board.side == LIGHT;
       {
         score_t s_unused;
@@ -118,12 +120,18 @@ class database {
         bool found = get_transposition_value(board, zlo, zhi, white,s_unused,excess_unused, true,board.depth+excess);
         if(found) {
           assert(excess == 0);
-          if(lo == zlo && hi == zhi)
+          if(lo <= zlo && zhi <= hi)
             return;
           if(board.depth > 2)
             cout << "Narrowing ";
+          int olo = lo, ohi = hi;
           lo = max(lo,zlo);
           hi = min(hi,zhi);
+          if(lo >= hi)
+            std::cout << "olo=" << olo << " ohi=" << ohi << " zlo=" << zlo << " zhi=" << zhi << std::endl;
+          assert(lo < hi);
+          if(lo >= hi)
+           hi = lo+1;
         }
       }
       //if(board.depth > 2)
@@ -253,14 +261,13 @@ class database {
       //int sum_depth = atoi(v_score.at(3).c_str());
       excess_depth = atoi(v_score.at(2).c_str()) - board.depth;
       //int excess= sum_depth-depth;
-      if (score_board(board) < atoi(v_score.at(1).c_str()) || exact){
-       lower =  atol(v_score.at(1).c_str());
-       upper =  atol(v_score.at(0).c_str());
-       //cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
-       gotten = true;
-       }
+      lower =  atol(v_score.at(1).c_str());
+      upper =  atol(v_score.at(0).c_str());
+      assert(lower < upper);
+      //cout<<"upper ="<<upper<<" lower ="<<lower<<endl;
+      gotten = true;
     }
-    else {
+    if(!gotten) {
       excess_depth = 0;
       lower = bad_min_score;
       upper = bad_max_score;
@@ -268,6 +275,9 @@ class database {
     //deeper= false;
     return gotten;
     #else
+    excess_depth = 0;
+    lower = bad_min_score;
+    upper = bad_max_score;
     return false;
     #endif
   }

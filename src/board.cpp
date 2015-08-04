@@ -35,7 +35,6 @@ void init_board(node_t& board)
     board.fifty = 0;
     board.move_num = 0;
     board.ply = 0;
-    board.hply = 0;
     board.hist_dat.clear();
     // init_hash() must be called before this function
     board.hash = set_hash(board);  
@@ -431,7 +430,6 @@ bool makemove(node_t& board,chess_move& m)
 
     board.hist_dat.push_back(board.hash);
     board.ply++;
-    board.hply++;
 
     /* update the castle, en passant, and
        fifty-chess_move-draw variables */
@@ -452,11 +450,13 @@ bool makemove(node_t& board,chess_move& m)
         board.ep = -1;
     if (m.getBits() & 17){
         board.fifty = 0;
-        board.move_num++;}
-    else{ 
+        board.move_num++;
+        board.hist_dat.clear();
+    }else{ 
         board.fifty++;
         board.move_num++;
     }
+    assert(board.hist_dat.size() == board.fifty);
     /* move the piece */
     board.color[m.getTo()] = board.side;
     if (m.getBits() & 32)
@@ -512,6 +512,6 @@ bool makemove(node_t& board,chess_move& m)
     }
 #endif
     //board.hash = set_hash(board);
-    assert(board.hash != 0);
+    //assert(board.hash != 0);
     return true;
 }

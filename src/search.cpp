@@ -25,7 +25,7 @@
 
 const bool test_mtdf = false;
 
-//#define TRANSPOSE_ON 1
+#define TRANSPOSE_ON 1
 
 Mutex cmutex;
 const int num_proc = chx_threads_per_proc();
@@ -393,11 +393,11 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
           if(g == lower) {
             beta = ADD_SCORE(g,+1);
             alpha = ADD_SCORE(beta,-1);
-            alpha = ADD_SCORE(alpha,width);
+            alpha = ADD_SCORE(beta,width);
           } else {
             beta = g;
             alpha = ADD_SCORE(beta,-1);
-            beta = ADD_SCORE(beta,-width);
+            beta = ADD_SCORE(alpha,-width);
           }
           alpha = max(alpha,lower);
           beta  = min(beta ,upper);
@@ -432,6 +432,7 @@ score_t mtdf(node_t& board,score_t f,int depth,const score_t target,score_t movi
           }
         }
         width += grow_width;
+        assert(lower <= upper);
     }
     if(test_mtdf && g != g2) {
       std::cerr << "g=" << g << " g2=" << g2 << " lower=" << lower << " upper=" << upper << std::endl;
@@ -501,8 +502,8 @@ void mqswap(std::vector<T>& vec,int i1,int i2) {
 
 void sort_pv(std::vector<chess_move>& workq, int index)
 {
-  int i1=0, i2=workq.size()-1;
   chess_move mv1,mv2;
+  int i1=0, i2=workq.size()-1;
   // put the last 2 pv searches first
   if(pv.size()>0) {
     mv1 = pv[pv.size()-1].mv;
@@ -514,8 +515,8 @@ void sort_pv(std::vector<chess_move>& workq, int index)
       }
     }
   }
-  if(pv.size()>1) {
-    mv2 = pv[pv.size()-1].mv;
+  if(pv.size()>2) {
+    mv2 = pv[pv.size()-2].mv;
     if(mv2 != mv1) {
       for(int i=i1;i<workq.size();i++) {
         if(mv2 == workq[i]) {
@@ -526,16 +527,36 @@ void sort_pv(std::vector<chess_move>& workq, int index)
       }
     }
   }
-  // put captures last
-  while(i1 < i2) {
-    if(!workq[i1].getCapture())
-      i1++;
-    else if(workq[i2].getCapture())
-      i2--;
-    else
-      mqswap(workq,i1,i2);
+  // shuffle
+  int n = workq.size();
+  while(n > 1) {
+    int n1 = n - 1;
+    int nr = rand()%(n);
+    mqswap(workq,n1,nr);
+    n = n1;
   }
-}
+  if(index < 2) {
+    // put captures last
+    while(i1 < i2) {
+      if(!workq[i1].getCapture())
+        i1++;
+      else if(workq[i2].getCapture())
+        i2--;
+      else
+        mqswap(workq,i1,i2);
+    }
+  } else {
+      // put captures first
+      while(i1 < i2) {
+        if(workq[i1].getCapture())
+          i1++;
+        else if(!workq[i2].getCapture())
+          i2--;
+        else
+          mqswap(workq,i1,i2);
+      }
+    }
+  }
 
 inline int iabs(int n) {
   if(n < 0)

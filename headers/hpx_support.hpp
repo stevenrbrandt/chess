@@ -32,7 +32,6 @@ void serialize(Archive &ar, node_t& board, const unsigned int)
     ar & board.ep;
     ar & board.fifty;
     ar & board.ply;
-    ar & board.hply;
     ar & board.hist_dat;
 }
 template <typename Archive>

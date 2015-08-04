@@ -95,7 +95,7 @@ int chx_main()
 {
 
 #ifdef READLINE_SUPPORT
-    char *buf;
+    char *buf=0;
 #else
     std::string buf;
 #endif
@@ -153,6 +153,7 @@ int chx_main()
                                   the next board position */
 
             if (output) {
+                //cout<<"\033[H\033[2J"; // clear the screen
                 print_board(board, std::cout);
                 evaluator ev;
                 int score = ev.eval_simple(board);
@@ -162,7 +163,7 @@ int chx_main()
                 } else {
                   std::cout << "BLACK MOVED: ";
                 }
-                std::cout << "SCORE: " << score << std::endl;
+                std::cout << "SCORE := " << score << std::endl;
             }
             if (auto_move)
                 auto_move = print_result(workq, board);
@@ -356,6 +357,20 @@ int chx_main()
           start_benchmark(filename, 0, 0, false, board);
           print_board(board,std::cout);
           gen(workq, board);
+          continue;
+        }
+        if (input[0] == "experiment") {
+          std::string filename = "pr";
+          start_benchmark(filename, 0, 0, false, board);
+          print_board(board,std::cout);
+          gen(workq, board);
+          board.root_side=LIGHT;
+
+          int depth = 1;//atoi(input.at(1).c_str());
+          int alpha = 712;//atoi(input.at(2).c_str());
+          int beta = 714;//atoi(input.at(3).c_str());
+          void expr(int,int,int,node_t&);
+          expr(depth,alpha,beta,board);
           continue;
         }
         if (input[0] == "bench") {
@@ -716,8 +731,8 @@ void start_benchmark(std::string filename, int ply_level, int num_runs,bool para
   board.castle = 15;
   board.ep = -1;
   board.fifty = 0;
+  board.hist_dat.clear();
   board.ply = 0;
-  board.hply = 0;
   board.hash = set_hash(board);
   //At this point we have the board position configured to the file specification
   print_board(board, std::cout);
@@ -890,6 +905,7 @@ void print_board(const node_t& board, std::ostream& out,bool trimmed)
       if (!trimmed) out << std::endl << 7 - ROW(i) << " ";
   }
   if (!trimmed) out << std::endl << std::endl << "   a b c d e f g h" << std::endl << std::endl;
+  if(trimmed) out << ":" << board.castle << ":" << board.ep;
 }
 
 
