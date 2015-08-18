@@ -144,6 +144,7 @@ int chx_main()
                     << std::endl;
             if (pgn_enabled)
                 pgn_output(board, move_to_make);
+
             cout<<"Ply number: "<<board.move_num<<endl;
             makemove(board, move_to_make); // Make the chess_move for our master board
             board.ply = 0; // Reset the board ply to 0
@@ -357,20 +358,6 @@ int chx_main()
           start_benchmark(filename, 0, 0, false, board);
           print_board(board,std::cout);
           gen(workq, board);
-          continue;
-        }
-        if (input[0] == "experiment") {
-          std::string filename = "pr";
-          start_benchmark(filename, 0, 0, false, board);
-          print_board(board,std::cout);
-          gen(workq, board);
-          board.root_side=LIGHT;
-
-          int depth = 1;//atoi(input.at(1).c_str());
-          int alpha = 712;//atoi(input.at(2).c_str());
-          int beta = 714;//atoi(input.at(3).c_str());
-          void expr(int,int,int,node_t&);
-          expr(depth,alpha,beta,board);
           continue;
         }
         if (input[0] == "bench") {

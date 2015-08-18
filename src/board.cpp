@@ -21,6 +21,82 @@
 
 // init_board() sets the board to the initial game state.
 
+
+// Construct a board from a string
+node_t::node_t(std::string s) {
+  int spot = 0;
+  for(auto i=s.begin();i != s.end();++i) {
+    const char c = *i;
+    bool incr = false;
+    if (c == '.')
+    {
+      incr = true;
+      color[spot] = 6;
+      piece[spot] = 6;
+    }
+    else if(islower(c))
+    {
+      incr = true;
+      color[spot] = 1;
+      switch (c)
+      {
+        case 'k':
+          piece[spot] = 5;
+          break;
+        case 'q':
+          piece[spot] = 4;
+          break;
+        case 'r':
+          piece[spot] = 3;
+          break;
+        case 'b':
+          piece[spot] = 2;
+          break;
+        case 'n':
+          piece[spot] = 1;
+          break;
+        case 'p':
+          piece[spot] = 0;
+          break;
+        default:
+          incr = false;
+          break;
+      }
+    }
+    else if(isupper(c))
+    {
+      incr = true;
+      color[spot] = 0;
+      switch (c)
+      {
+        case 'K':
+          piece[spot] = 5;
+          break;
+        case 'Q':
+          piece[spot] = 4;
+          break;
+        case 'R':
+          piece[spot] = 3;
+          break;
+        case 'B':
+          piece[spot] = 2;
+          break;
+        case 'N':
+          piece[spot] = 1;
+          break;
+        case 'P':
+          piece[spot] = 0;
+          break;
+        default:
+          incr = false;
+          break;
+      }
+    }
+    if(incr && spot < 63)
+      spot++;
+  }
+}
+
 void init_board(node_t& board)
 {
     int i;

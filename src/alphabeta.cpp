@@ -57,36 +57,33 @@ struct When {
 
 bool db_on = true;
 
-// board.hash=2390046143 board.excess_depth=0 board.side=0 board.castle=11 board.ep=-1 board.move_num=0 board.follow_capt=0 board.root_side=0 board.follow_score=-2013250280 board.follow_depth=3 board.search_depth=5 board.ply=0 board.p_board=68 board.fifty=0 board.hist_dat.size()=0 hist={}
-// mv.str()=a8a8 par_done=0 result=-11000 depth=1 alpha=712 beta=714 printed_board=0 excess=0 quiescent=0 draw=0 incr=1959353788 abort_flag=0x4c937a0 abort_flag_=0
-void expr(int d,int a,int b,node_t& board) {
+// TODO: The verify routine should take the string
+// representation of a board, not a const ref.
+void verify(const node_t& board,const int depth,const score_t alpha0,const score_t beta0) {
+  bool exact = false;
+  if(!db_on)
+    return;
+  score_t alpha = alpha0, beta = beta0;
+  alpha = max(ADD_SCORE(alpha,-1),bad_min_score);
+  beta  = min(ADD_SCORE(beta,1),bad_max_score);
+
   boost::shared_ptr<search_info> info{new search_info};
   info->board = board;
-  board.castle=11;
-  board.ep=-1;
-  board.move_num = 0;
-  board.root_side=0;
-  board.side=0;
-  board.p_board = 62;
-  board.follow_capt = 0;
-  board.follow_depth = 6;
-  board.follow_score = -770528928;
-  board.search_depth = 5;
   int n = board.hist_dat.size();
   info->board.clear();
   assert(n == board.hist_dat.size());
-  info->alpha = 712;//a;
-  info->beta = 738;//b;
-  info->board.depth = d;
-  info->depth = d;
-  info->use_srand = true;
-  //info->incr = 1959353788;
-  info->incr = 84137763;
+  info->alpha = alpha;
+  info->beta = beta;
+  info->depth = board.depth;
+  info->board.depth = info->depth;
   db_on = false;
   score_t g = search_ab(info);
   db_on = true;
-  std::cout << info;
-  std::cout << " g=" << g << std::endl;
+  if(info->draw)
+    return;
+  if (!(alpha < g && g < beta))
+    std::cout<<"(g,a,b,depth)=" << g << "," << alpha << "," << beta << "," << depth << std::endl;
+  assert(alpha < g && g < beta);
 }
 
 score_t search_ab(boost::shared_ptr<search_info> proc_info)
@@ -137,7 +134,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     bool entry_found = false;
     int excess =0;
     bool exact = false;
-    if (board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
+    if (white && board.root_side == LIGHT && db_on && board.ply > 0 && !proc_info->quiescent){
       entry_found = dbase.get_transposition_value (board, zlo, zhi, white,p_board,excess,exact,board.depth);
       int pe = proc_info->excess;
       if (excess > proc_info->excess){
@@ -148,28 +145,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       else{
         //board.follow_depth = 0;
       }
-      if(false && entry_found && db_on && board.side == LIGHT) {
-        boost::shared_ptr<search_info> info{new search_info};
-        info->board = board;
-        int n = board.hist_dat.size();
-        info->board.clear();
-        assert(n == board.hist_dat.size());
-        info->alpha = zlo-1;
-        info->beta = zlo+1;
-        info->depth = board.depth + excess;
-        info->board.depth = info->depth;
-        db_on = false;
-        score_t g = search_ab(info);
-        db_on = true;
-        assert(!info->draw);
-        if (g<zlo)
-          std::cout<<"(g,zlo,depth)=("<<g<<","<<zlo<<","<<depth<<")"<<std::endl;
-        assert ( g >= zlo); 
-        if(g < zlo) {
-          entry_found = false;
-          excess = 0;
-          proc_info->excess = pe;
-        }
+      if(entry_found && excess > 0) {
+        assert(depth == board.depth);
+        std::cout << "excess = " << (excess+depth) << std::endl;
+        zhi = bad_max_score;
+        verify(board,depth+excess,zlo,bad_max_score);
       }
     }
       
@@ -180,27 +160,9 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     if(!entry_found && db_on) {
       entry_found = get_transposition_value (board, zlo, zhi);
 
-      if(false && !entry_found && board.side == LIGHT){
+      if(!entry_found && board.side == LIGHT){
         entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true,depth);
-        //assert(excess == 0);
-        if(entry_found && db_on) {
-          assert(excess == 0);
-          assert(depth == board.depth);
-          boost::shared_ptr<search_info> info{new search_info};
-          info->board = board;
-          info->board.clear();
-          info->alpha = zlo-1;
-          info->beta = zlo+1;
-          info->depth = board.depth + excess;
-          info->board.depth = info->depth;
-          db_on = false;
-          score_t g = search_ab(info);
-          db_on = true;
-          assert(!info->draw);
-          if (g<zlo)
-            std::cout<<"(g,zlo,depth)=("<<g<<","<<zlo<<","<<depth<<")"<<std::endl;
-          assert ( g >= zlo); 
-        }
+        verify(board,depth,zlo,zhi);
       }
     }
 
@@ -386,7 +348,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       store = false;
     }
     if(proc_info->quiescent)
-      ;//store = false;
+      store = false;
 
     score_t lo, hi;
     if(proc_info->excess) {
@@ -417,29 +379,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     }
 
     if(store && db_on && depth==1) {
-      assert(excess == 0);
-      boost::shared_ptr<search_info> info{new search_info};
-      info->board = board;
-      info->board.clear();
-      info->alpha = lo-1;
-      info->beta = lo+1;
-      info->depth = board.depth + excess;
-      info->board.depth = info->depth;
-      db_on = false;
-      score_t g = search_ab(info);
-      db_on = true;
-      assert(!info->draw);
-      if (g<lo) {
-        std::cout<<"(g,lo,depth,zlo,zhi)=("<<g<<","<<lo<<","<<depth<<","<<zlo<<","<<zhi<<")"<<std::endl;
-        std::cout << "===" << std::endl;
-        std::cout << proc_info << std::endl;
-        std::cout << "===" << std::endl;
-        std::cout << info << std::endl;
-        std::cout << "===" << std::endl;
-        print_board(sav_board,std::cout);
-        std::cout << "===" << std::endl;
-      }
-      assert ( g >= lo); 
+      verify(board,depth,lo,hi);
     }
     if(store) {
       //if(board.depth > 1)

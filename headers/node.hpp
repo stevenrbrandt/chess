@@ -45,6 +45,10 @@ struct node_t : public base_node_t {
       ply = 0;
       move_num = 0;
     }
+    node_t() {}
+    // Make it possible to construct a board from
+    // a string representation.
+    node_t(std::string s);
 };
 
 #endif
