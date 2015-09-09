@@ -59,7 +59,7 @@ bool db_on = true;
 
 // TODO: The verify routine should take the string
 // representation of a board, not a const ref.
-void verify(const node_t& board,const int depth,const score_t alpha0,const score_t beta0) {
+void verify(std::string strBoard,const int depth,const score_t alpha0,const score_t beta0) {
   bool exact = false;
   if(!db_on)
     return;
@@ -68,13 +68,14 @@ void verify(const node_t& board,const int depth,const score_t alpha0,const score
   beta  = min(ADD_SCORE(beta,1),bad_max_score);
 
   boost::shared_ptr<search_info> info{new search_info};
+  node_t board(strBoard);
   info->board = board;
-  int n = board.hist_dat.size();
-  info->board.clear();
-  assert(n == board.hist_dat.size());
+  //int n = board.hist_dat.size();
+  //info->board.clear();
+  //assert(n == board.hist_dat.size());
   info->alpha = alpha;
   info->beta = beta;
-  info->depth = board.depth;
+  info->depth = depth;
   info->board.depth = info->depth;
   db_on = false;
   score_t g = search_ab(info);
@@ -101,6 +102,11 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     score_t alpha = proc_info->alpha;
     score_t beta = proc_info->beta;
     assert(depth >= 0);
+    
+    std::ostringstream strB;
+    print_board(board, strB, true);
+    std::string strBoard = strB.str();
+    
     // if we are a leaf node, return the value from the eval() function
     if (depth == 0)
     {
@@ -127,6 +133,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         return z;
     }
 
+
     score_t max_val = bad_min_score;
     score_t p_board = board.p_board;
     score_t zlo = bad_min_score,zhi = bad_max_score;
@@ -149,7 +156,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         assert(depth == board.depth);
         std::cout << "excess = " << (excess+depth) << std::endl;
         zhi = bad_max_score;
-        verify(board,depth+excess,zlo,bad_max_score);
+        //verify(strBoard,depth+excess,zlo,bad_max_score);
       }
     }
       
@@ -157,12 +164,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       return zlo;
     }
    
-    if(!entry_found && db_on) {
+    if(!entry_found) {
       entry_found = get_transposition_value (board, zlo, zhi);
 
-      if(!entry_found && board.side == LIGHT){
+      if(!entry_found && db_on && board.side == LIGHT){
         entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true,depth);
-        verify(board,depth,zlo,zhi);
+        verify(strBoard,depth,zlo,zhi);
       }
     }
 
@@ -379,7 +386,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
     }
 
     if(store && db_on && depth==1) {
-      verify(board,depth,lo,hi);
+      verify(strBoard,depth,lo,hi);
     }
     if(store) {
       //if(board.depth > 1)

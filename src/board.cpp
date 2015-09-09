@@ -220,7 +220,7 @@ bool in_check(const node_t& board, int s)
     for (i = 0; i < 64; ++i)
         if (board.piece[i] == KING && board.color[i] == s)
             return attack(board, i, s ^ 1);
-    assert(false);
+   // assert(false);
     return true;  /* shouldn't get here */
 }
 
