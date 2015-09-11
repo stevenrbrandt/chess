@@ -216,11 +216,15 @@ hash_t update_hash(node_t& board, chess_move& m)
 bool in_check(const node_t& board, int s)
 {
     int i;
-
-    for (i = 0; i < 64; ++i)
-        if (board.piece[i] == KING && board.color[i] == s)
+    assert(s == LIGHT || s == DARK);
+    for (i = 0; i < 64; ++i) {
+        if (board.piece[i] == KING && board.color[i] == s) {
             return attack(board, i, s ^ 1);
-   // assert(false);
+        }
+    }
+    // If this assertion triggers, it means that we could
+    // not find the king for side s.
+    assert(false);
     return true;  /* shouldn't get here */
 }
 

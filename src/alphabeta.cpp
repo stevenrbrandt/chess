@@ -59,16 +59,17 @@ bool db_on = true;
 
 // TODO: The verify routine should take the string
 // representation of a board, not a const ref.
-void verify(std::string strBoard,const int depth,const score_t alpha0,const score_t beta0) {
+void verify(std::string strBoard,int side,const int depth,const score_t alpha0,const score_t beta0) {
   bool exact = false;
-  if(!db_on)
-    return;
+  bool db_save = db_on;
+  db_on = false;
   score_t alpha = alpha0, beta = beta0;
   alpha = max(ADD_SCORE(alpha,-1),bad_min_score);
   beta  = min(ADD_SCORE(beta,1),bad_max_score);
 
   boost::shared_ptr<search_info> info{new search_info};
   node_t board(strBoard);
+  board.side = side;
   info->board = board;
   //int n = board.hist_dat.size();
   //info->board.clear();
@@ -85,6 +86,7 @@ void verify(std::string strBoard,const int depth,const score_t alpha0,const scor
   if (!(alpha < g && g < beta))
     std::cout<<"(g,a,b,depth)=" << g << "," << alpha << "," << beta << "," << depth << std::endl;
   assert(alpha < g && g < beta);
+  db_on = db_save;
 }
 
 score_t search_ab(boost::shared_ptr<search_info> proc_info)
@@ -156,7 +158,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
         assert(depth == board.depth);
         std::cout << "excess = " << (excess+depth) << std::endl;
         zhi = bad_max_score;
-        //verify(strBoard,depth+excess,zlo,bad_max_score);
+        verify(strBoard,board.side,depth+excess,zlo,bad_max_score);
       }
     }
       
@@ -169,7 +171,7 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
 
       if(!entry_found && db_on && board.side == LIGHT){
         entry_found = dbase.get_transposition_value(board,zlo,zhi,white,p_board,excess,true,depth);
-        verify(strBoard,depth,zlo,zhi);
+        verify(strBoard,board.side,depth,zlo,zhi);
       }
     }
 
@@ -385,8 +387,12 @@ score_t search_ab(boost::shared_ptr<search_info> proc_info)
       abort();
     }
 
-    if(store && db_on && depth==1) {
-      verify(strBoard,depth,lo,hi);
+    if(store && db_on) {
+      std::ostringstream strB;
+      print_board(board, strB, true);
+      std::string strBoard = strB.str();
+    
+      verify(strBoard,board.side,depth,lo,hi);
     }
     if(store) {
       //if(board.depth > 1)
