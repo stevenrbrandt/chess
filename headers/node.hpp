@@ -14,6 +14,13 @@
 #include "defs.hpp"
 #include "hash.hpp"
 
+/**
+ * IMPORTANT NOTE:
+ * The board_equal() method compares the base_node_t
+ * data bitwise to determine whether two boards are
+ * equal. Don't put pointers here, and don't add anything
+ * that would violate the needs of board_equal().
+ */
 struct base_node_t { 
     hash_t hash=0;
     char color[64];
@@ -27,17 +34,18 @@ struct base_node_t {
     /* the number of moves since a capture or pawn chess_move, used to handle the fifty-chess_move-draw rule */
     int fifty=0;
     //counts number of moves
+};
+struct node_t : public base_node_t {
     int move_num=0;
     score_t p_board;
+    int ply=0;
     bool follow_capt = false;
     bool root_side=-1;
     score_t follow_score;
     int follow_depth = 2;
     int search_depth = 0;
-    int ply=0;
-};
-struct node_t : public base_node_t {
     std::vector<hash_t> hist_dat;
+
     void clear() {
       hist_dat.clear();
       fifty = 0;

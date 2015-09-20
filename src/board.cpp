@@ -95,6 +95,7 @@ node_t::node_t(std::string s) {
     if(incr && spot < 63)
       spot++;
   }
+  hash = set_hash(*this);
 }
 
 void init_board(node_t& board)
@@ -224,6 +225,7 @@ bool in_check(const node_t& board, int s)
     }
     // If this assertion triggers, it means that we could
     // not find the king for side s.
+    std::cout << " s=" << s << std::endl;
     assert(false);
     return true;  /* shouldn't get here */
 }
