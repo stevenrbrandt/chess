@@ -30,12 +30,11 @@ struct base_node_t {
     int side=-1;
     int castle=0;
     int ep=0;
+};
+struct node_t : public base_node_t {
     
     /* the number of moves since a capture or pawn chess_move, used to handle the fifty-chess_move-draw rule */
     int fifty=0;
-    //counts number of moves
-};
-struct node_t : public base_node_t {
     int move_num=0;
     score_t p_board;
     int ply=0;
